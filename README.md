@@ -16,10 +16,10 @@ grest version
 
 ## Usage
 
-```bash
+```
 grest new app        = Create a new grest app in the current folder
-grest new service    = create a new service on grest app
-grest version        = Check grest-cli version`
+grest new service    = Create a new service of grest app in the current folder
+grest version        = Check grest-cli version
 ```
 
 ## License
