@@ -13,6 +13,9 @@ func main() {
 		if os.Args[1] == "version" {
 			cmd.PrintVersion()
 			return
+		} else if os.Args[1] == "fmt" {
+			cmd.FormatApp()
+			return
 		} else if len(os.Args) > 2 {
 			if os.Args[1] == "new" {
 				if os.Args[2] == "app" {
