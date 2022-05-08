@@ -14,7 +14,36 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
+
+type cmdFmt struct{}
+
+func CmdFmt() *cobra.Command {
+	return &cobra.Command{
+		Use:   "fmt",
+		Short: cmdFmt{}.Summary(),
+		Long:  cmdFmt{}.Description(),
+		Run:   cmdFmt{}.Run,
+	}
+}
+
+func (cmdFmt) Summary() string {
+	return "Format the struct tag"
+}
+
+func (cmdFmt) Description() string {
+	return `
+Format / align the multiple struct tags. It align the tags to become much more readable and save allot of time from having to do it manually.
+
+Ensure you run this within the root directory of your app.
+`
+}
+
+func (cmdFmt) Run(c *cobra.Command, args []string) {
+	FormatApp()
+}
 
 type Tag struct {
 	Key   string

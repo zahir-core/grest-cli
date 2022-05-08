@@ -4,7 +4,37 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+
+	"github.com/spf13/cobra"
 )
+
+type cmdInit struct{}
+
+func CmdInit() *cobra.Command {
+	return &cobra.Command{
+		Use:   "init",
+		Short: cmdInit{}.Summary(),
+		Long:  cmdInit{}.Description(),
+		Run:   cmdInit{}.Run,
+	}
+}
+
+func (cmdInit) Summary() string {
+	return "Initialize new app in the current directory"
+}
+
+func (cmdInit) Description() string {
+	return `
+Create a new grest app by automatically generating the basic code.
+It will guess which kind of file to create based on the path provided.
+
+Ensure you run this within the root directory of your app.
+`
+}
+
+func (cmdInit) Run(c *cobra.Command, args []string) {
+	fmt.Println("init: todo")
+}
 
 func NewApp() {
 	modulePath := "my-app"

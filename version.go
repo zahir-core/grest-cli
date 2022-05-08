@@ -4,12 +4,42 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"grest.dev/grest/log"
 )
 
-var Version = "v0.0.0"
+const Version = "v0.0.3"
+
+type cmdVersion struct{}
+
+func CmdVersion() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: cmdVersion{}.Summary(),
+		Long:  cmdVersion{}.Description(),
+		Run:   cmdVersion{}.Run,
+	}
+}
+
+func (cmdVersion) Summary() string {
+	return "Print the grest version"
+}
+
+func (cmdVersion) Description() string {
+	return `
+Print the grest version.
+`
+}
+
+func (cmdVersion) Run(c *cobra.Command, args []string) {
+	PrintVersion()
+}
 
 func PrintVersion() {
+	fmt.Fprintln(log.Stdout, GetVersion())
+}
+
+func GetVersion() string {
 	msg := strings.Builder{}
 	msg.WriteString(log.Fmt(`        ________________________________________`, log.HiMagenta, log.Bold, log.Italic))
 	msg.WriteString("\n")
@@ -67,6 +97,5 @@ func PrintVersion() {
 	msg.WriteString("\n")
 
 	msg.WriteString(log.Fmt(`/______________________________________/`, log.HiMagenta, log.Bold, log.Italic))
-
-	fmt.Fprintln(log.Stdout, msg.String())
+	return msg.String()
 }

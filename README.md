@@ -16,11 +16,21 @@ grest version
 
 ## Usage
 
-```
-grest new app        = Create a new grest app in the current folder
-grest new service    = Create a new service of grest app in the current folder
-grest version        = Check grest-cli version
-grest fmt            = Formatting struct tag
+```bash
+# Initialize new app in the current directory
+grest init
+
+# Add a new end point for the current app
+grest add
+
+# Format the struct tag
+grest fmt
+
+# Print the grest version
+grest version
+
+# Help about any command
+grest help
 ```
 
 ## License
