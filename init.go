@@ -1,21 +1,25 @@
 package cmd
 
 import (
-	"encoding/base64"
+	"embed"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
+//go:embed all:openapi-ui
+var f embed.FS
+
 type cmdInit struct{}
 
 func CmdInit() *cobra.Command {
 	return &cobra.Command{
-		Use:   "init",
-		Short: cmdInit{}.Summary(),
-		Long:  cmdInit{}.Description(),
-		Run:   cmdInit{}.Run,
+		Use:     "init",
+		Example: "grest init example.com/org/backend",
+		Short:   cmdInit{}.Summary(),
+		Long:    cmdInit{}.Description(),
+		Run:     cmdInit{}.Run,
 	}
 }
 
@@ -33,57 +37,50 @@ Ensure you run this within the root directory of your app.
 }
 
 func (cmdInit) Run(c *cobra.Command, args []string) {
-	fmt.Println("init: todo")
-}
-
-func NewApp() {
-	modulePath := "my-app"
-	fmt.Print("Module Path : ")
-	fmt.Scan(&modulePath)
-
-	dbDriver := "postgres"
-	fmt.Print("Database Driver : ")
-	fmt.Scan(&dbDriver)
-
-	useRedis := "true"
-	fmt.Print("Use Redis Cache : ")
-	fmt.Scan(&useRedis)
-
-	useOauth2 := "true"
-	fmt.Print("Use Default OAuth2 Server : ")
-	fmt.Scan(&useOauth2)
-
-	fmt.Println("modulePath :", modulePath)
-	fmt.Println("dbDriver :", dbDriver)
-	fmt.Println("useRedis :", useRedis)
-	fmt.Println("useOauth2 :", useOauth2)
-	err := writeSwaggerFiles()
-	if err != nil {
-		fmt.Println("writting swagger files error : ", err.Error())
+	if len(args) == 0 {
+		c.Help()
+	} else {
+		writeGoModFile(args[0])
+		writeOpenAPIUIFiles(args[0])
 	}
 }
 
-func writeSwaggerFiles() error {
-	fmt.Println("writting swagger files...")
-	filePath := "docs"
+func writeGoModFile(name string) error {
+	if err := os.MkdirAll(name, 0755); err != nil {
+		return err
+	}
+	gomod := "module " + name + "\n\ngo 1.20"
+	filename := name + "/go.mod"
+	fmt.Println("writting file :", filename)
+	err := os.WriteFile(filename, []byte(gomod), 0755)
+	return err
+}
 
-	// reset
+func writeOpenAPIUIFiles(name string) error {
+	fmt.Println("writting @stoplight/elements files...")
+	filePath := name + "/docs"
+
 	os.RemoveAll(filePath)
 	if err := os.MkdirAll(filePath, 0755); err != nil {
 		return err
 	}
 
-	for fileName, fileContent := range GetSwaggerUiFiles() {
-		content, err := base64.StdEncoding.DecodeString(fileContent)
+	files := []string{
+		"stoplight-elements-web-components.min.js",
+		"stoplight-elements-styles.min.css",
+		"index.html",
+	}
+	for _, fileName := range files {
+		file, err := f.ReadFile("openapi-ui/" + fileName)
 		if err != nil {
 			return err
 		}
 		fmt.Println("writting file :", filePath+"/"+fileName)
-		err = os.WriteFile(filePath+"/"+fileName, content, 0755)
+		err = os.WriteFile(filePath+"/"+fileName, file, 0755)
 		if err != nil {
 			return err
 		}
 	}
-	fmt.Println("swagger files has been written")
+	fmt.Println("@stoplight/elements files has been written")
 	return nil
 }

@@ -18,15 +18,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// main operation modes
+	list        = false
+	write       = true
+	rewriteRule = ""
+	simplifyAST = false
+	doDiff      = false
+	allErrors   = false
+
+	// debugging
+	cpuprofile = ""
+)
+
 type cmdFmt struct{}
 
 func CmdFmt() *cobra.Command {
-	return &cobra.Command{
-		Use:   "fmt",
+	cli := &cobra.Command{
+		Use:   "fmt [flags] [path ...]",
 		Short: cmdFmt{}.Summary(),
 		Long:  cmdFmt{}.Description(),
 		Run:   cmdFmt{}.Run,
 	}
+	// cli.Flags().BoolVarP(&list, "list", "l", false, "list files whose formatting differs from gofmt's")
+	cli.Flags().BoolVarP(&write, "write", "w", true, "write result to (source) file instead of stdout")
+	// cli.Flags().StringVarP(&rewriteRule, "rewrite-rule", "r", "", "rewrite rule (e.g., 'a[b:len(a)] -> a[b:]')")
+	// cli.Flags().BoolVarP(&simplifyAST, "simplify", "s", false, "simplify code")
+	// cli.Flags().BoolVarP(&doDiff, "display-diffs", "d", false, "display diffs instead of rewriting files")
+	// cli.Flags().BoolVarP(&allErrors, "report-errors", "e", false, "report all errors (not just the first 10 on different lines)")
+
+	// cli.Flags().StringVarP(&cpuprofile, "cpuprofile", "", "", "write cpu profile to this file")
+
+	return cli
 }
 
 func (cmdFmt) Summary() string {
@@ -42,7 +65,7 @@ Ensure you run this within the root directory of your app.
 }
 
 func (cmdFmt) Run(c *cobra.Command, args []string) {
-	FormatApp()
+	FormatApp(args)
 }
 
 type Tag struct {
@@ -50,17 +73,22 @@ type Tag struct {
 	Value string
 }
 
-func FormatApp() {
-	filepath.Walk(".",
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if !info.IsDir() && strings.HasSuffix(path, ".go") {
-				FormatFile(path)
-			}
-			return nil
-		})
+func FormatApp(paths []string) {
+	if len(paths) == 0 {
+		paths = append(paths, ".")
+	}
+	for _, path := range paths {
+		filepath.Walk(path,
+			func(p string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if !info.IsDir() && strings.HasSuffix(p, ".go") {
+					FormatFile(p)
+				}
+				return nil
+			})
+	}
 }
 
 func FormatFile(fileName string) {
@@ -105,7 +133,7 @@ func ParseTag(fields []*ast.Field) (mapTag map[string][]Tag, maxTagLen map[strin
 	for _, field := range fields {
 		if len(field.Names) > 0 {
 			if field.Tag == nil {
-				field.Tag = &ast.BasicLit{}
+				continue
 			}
 
 			var tags []Tag
@@ -151,28 +179,20 @@ func FormattedTagString(tags []Tag, maxTagLen map[string]int) string {
 	}
 	sortedTags := []Tag{}
 	sort.Slice(tags, func(i, j int) bool { return tags[i].Key < tags[j].Key })
-	for _, tag := range tags {
-		if tag.Key == "json" {
-			sortedTags = append(sortedTags, tag)
+	for _, tagKey := range []string{"json", "form", "xml", "db", "gorm", "validate", "default", "example", "title", "note"} {
+		for _, tag := range tags {
+			if tag.Key == tagKey {
+				sortedTags = append(sortedTags, tag)
+			}
 		}
 	}
+
 	for _, tag := range tags {
-		if tag.Key == "db" {
-			sortedTags = append(sortedTags, tag)
-		}
-	}
-	for _, tag := range tags {
-		if tag.Key == "gorm" {
-			sortedTags = append(sortedTags, tag)
-		}
-	}
-	for _, tag := range tags {
-		if tag.Key == "validate" {
-			sortedTags = append(sortedTags, tag)
-		}
-	}
-	for _, tag := range tags {
-		if tag.Key != "json" && tag.Key != "db" && tag.Key != "gorm" && tag.Key != "validate" {
+		switch tag.Key {
+		case "json", "form", "xml", "db", "gorm", "validate", "default", "example", "title", "note":
+			// do nothing
+		default:
+			// append additional tag
 			sortedTags = append(sortedTags, tag)
 		}
 	}

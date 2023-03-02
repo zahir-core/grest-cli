@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"grest.dev/grest/log"
+	"grest.dev/grest"
 )
 
-const Version = "v0.0.3"
+const Version = "v0.0.4"
 
 type cmdVersion struct{}
 
@@ -36,66 +36,66 @@ func (cmdVersion) Run(c *cobra.Command, args []string) {
 }
 
 func PrintVersion() {
-	fmt.Fprintln(log.Stdout, GetVersion())
+	fmt.Fprintln(grest.FmtStdout, GetVersion())
 }
 
 func GetVersion() string {
 	msg := strings.Builder{}
-	msg.WriteString(log.Fmt(`        ________________________________________`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`        ________________________________________`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`       /        `, log.HiMagenta, log.Bold, log.Italic))
-	msg.WriteString(log.Fmt(`____`, log.HiCyan, log.Bold, log.BlinkRapid))
-	msg.WriteString(log.Fmt(`___  `, log.Red, log.Bold))
-	msg.WriteString(log.Fmt(`____`, log.Yellow, log.Bold))
-	msg.WriteString(log.Fmt(`____`, log.Green, log.Bold))
-	msg.WriteString(log.Fmt(`_____ `, log.Blue, log.Bold))
-	msg.WriteString(log.Fmt(`       /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`       /        `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`____`, grest.FmtHiCyan, grest.FmtBold, grest.FmtBlinkRapid))
+	msg.WriteString(grest.Fmt(`___  `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`____`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`____`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`_____ `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`       /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`      /    `, log.HiMagenta, log.Bold, log.Italic))
-	msg.WriteString(log.Fmt(`--- / __/`, log.HiCyan, log.Bold, log.BlinkRapid))
-	msg.WriteString(log.Fmt(` _ \`, log.Red, log.Bold))
-	msg.WriteString(log.Fmt(`/ __/`, log.Yellow, log.Bold))
-	msg.WriteString(log.Fmt(` __/`, log.Green, log.Bold))
-	msg.WriteString(log.Fmt(`_  _/ `, log.Blue, log.Bold))
-	msg.WriteString(log.Fmt(`      /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`      /    `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`--- / __/`, grest.FmtHiCyan, grest.FmtBold, grest.FmtBlinkRapid))
+	msg.WriteString(grest.Fmt(` _ \`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`/ __/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(` __/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`_  _/ `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`      /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`     /   `, log.HiMagenta, log.Bold, log.Italic))
-	msg.WriteString(log.Fmt(`---- / / /`, log.HiCyan, log.Bold, log.BlinkRapid))
-	msg.WriteString(log.Fmt(` / _/`, log.Red, log.Bold))
-	msg.WriteString(log.Fmt(` _/`, log.Yellow, log.Bold))
-	msg.WriteString(log.Fmt(`_\ \`, log.Green, log.Bold))
-	msg.WriteString(log.Fmt(`  / /  `, log.Blue, log.Bold))
-	msg.WriteString(log.Fmt(`      /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`     /   `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`---- / / /`, grest.FmtHiCyan, grest.FmtBold, grest.FmtBlinkRapid))
+	msg.WriteString(grest.Fmt(` / _/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(` _/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`_\ \`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`  / /  `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`      /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`    /     `, log.HiMagenta, log.Bold, log.Italic))
-	msg.WriteString(log.Fmt(`-- /___/`, log.HiCyan, log.Bold, log.BlinkRapid))
-	msg.WriteString(log.Fmt(`_/\ \`, log.Red, log.Bold))
-	msg.WriteString(log.Fmt(`___/`, log.Yellow, log.Bold))
-	msg.WriteString(log.Fmt(`___/`, log.Green, log.Bold))
-	msg.WriteString(log.Fmt(` /_/ `, log.Blue, log.Bold))
-	msg.WriteString(log.Fmt(`CLI`, log.HiCyan, log.Bold))
-	msg.WriteString(log.Fmt(`    /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`    /     `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`-- /___/`, grest.FmtHiCyan, grest.FmtBold, grest.FmtBlinkRapid))
+	msg.WriteString(grest.Fmt(`_/\ \`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`___/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`___/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(` /_/ `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`CLI`, grest.FmtHiCyan, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`    /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`   /                                      /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`   /                                      /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`  /               `, log.HiMagenta, log.Bold, log.Italic))
-	msg.WriteString(log.Fmt(" ", log.BgRed))
-	msg.WriteString(log.Fmt(Version, log.BgRed, log.Bold))
-	msg.WriteString(log.Fmt(" ", log.BgRed))
-	msg.WriteString(log.Fmt(`               /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`  /               `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(" ", grest.FmtBgRed))
+	msg.WriteString(grest.Fmt(Version, grest.FmtBgRed, grest.FmtBold))
+	msg.WriteString(grest.Fmt(" ", grest.FmtBgRed))
+	msg.WriteString(grest.Fmt(`               /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(` /             `, log.HiMagenta, log.Bold, log.Italic))
-	msg.WriteString(log.Fmt("https://grest.dev", log.Blue))
-	msg.WriteString(log.Fmt(`        /`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(` /             `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt("https://grest.dev", grest.FmtBlue))
+	msg.WriteString(grest.Fmt(`        /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(log.Fmt(`/______________________________________/`, log.HiMagenta, log.Bold, log.Italic))
+	msg.WriteString(grest.Fmt(`/______________________________________/`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	return msg.String()
 }
