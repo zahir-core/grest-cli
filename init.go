@@ -3,12 +3,16 @@ package cmd
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"os"
+	"os/exec"
+	"runtime"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
-//go:embed all:openapi-ui
+//go:embed all:codegentemplate
 var f embed.FS
 
 type cmdInit struct{}
@@ -40,47 +44,49 @@ func (cmdInit) Run(c *cobra.Command, args []string) {
 	if len(args) == 0 {
 		c.Help()
 	} else {
-		writeGoModFile(args[0])
-		writeOpenAPIUIFiles(args[0])
+		err := runInit(args[0])
+		if err == nil {
+			fmt.Println("Success!")
+		} else {
+			fmt.Println("Failed!", err.Error())
+		}
 	}
 }
 
 func writeGoModFile(name string) error {
-	if err := os.MkdirAll(name, 0755); err != nil {
-		return err
-	}
-	gomod := "module " + name + "\n\ngo 1.20"
-	filename := name + "/go.mod"
+	filename := "go.mod"
 	fmt.Println("writting file :", filename)
-	err := os.WriteFile(filename, []byte(gomod), 0755)
-	return err
+	return os.WriteFile(filename, []byte("module "+name+"\n\ngo "+runtime.Version()[2:6]), 0755)
 }
 
-func writeOpenAPIUIFiles(name string) error {
-	fmt.Println("writting @stoplight/elements files...")
-	filePath := name + "/docs"
-
-	os.RemoveAll(filePath)
-	if err := os.MkdirAll(filePath, 0755); err != nil {
+func runInit(name string) error {
+	err := writeGoModFile(name)
+	if err != nil {
 		return err
 	}
-
-	files := []string{
-		"stoplight-elements-web-components.min.js",
-		"stoplight-elements-styles.min.css",
-		"index.html",
+	fs.WalkDir(f, "codegentemplate",
+		func(fileName string, info fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			newFileName := strings.Replace(fileName, "codegentemplate/", "", 1)
+			if info.IsDir() {
+				if newFileName == "codegentemplate" {
+					return nil
+				}
+				return os.MkdirAll(newFileName, 0755)
+			}
+			content, err := f.ReadFile(fileName)
+			if err != nil {
+				return err
+			}
+			fmt.Println("writting file :", newFileName)
+			return os.WriteFile(newFileName, []byte(strings.ReplaceAll(string(content), "grest.dev/cmd/codegentemplate", name)), 0755)
+		})
+	err = exec.Command("go", "mod", "tidy").Run()
+	if err != nil {
+		return err
 	}
-	for _, fileName := range files {
-		file, err := f.ReadFile("openapi-ui/" + fileName)
-		if err != nil {
-			return err
-		}
-		fmt.Println("writting file :", filePath+"/"+fileName)
-		err = os.WriteFile(filePath+"/"+fileName, file, 0755)
-		if err != nil {
-			return err
-		}
-	}
-	fmt.Println("@stoplight/elements files has been written")
-	return nil
+	os.Setenv("IS_GENERATE_OPEN_API_DOC", "true")
+	return exec.Command("go", "run", "main.go").Run()
 }

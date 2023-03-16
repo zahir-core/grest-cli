@@ -1,15 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 )
 
 func main() {
-	downloadStoplightElementsJS()
-	downloadStoplightElementsCSS()
+	fmt.Println(runtime.Version()[2:6])
+	// downloadStoplightElementsJS()
+	// downloadStoplightElementsCSS()
 }
 
 func downloadStoplightElementsJS() {
@@ -19,7 +22,7 @@ func downloadStoplightElementsJS() {
 	}
 	defer res.Body.Close()
 
-	filename := "openapi-ui/stoplight-elements-web-components.min.js"
+	filename := "_codegen/docs/stoplight-elements-web-components.min.js"
 	os.Remove(filename)
 	file, err := os.Create(filename)
 	if err != nil {
@@ -40,7 +43,7 @@ func downloadStoplightElementsCSS() {
 	}
 	defer res.Body.Close()
 
-	filename := "openapi-ui/stoplight-elements-styles.min.css"
+	filename := "_codegen/docs/stoplight-elements-styles.min.css"
 	os.Remove(filename)
 	file, err := os.Create(filename)
 	if err != nil {

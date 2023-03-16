@@ -1,6 +1,6 @@
-# gREST CLI
+# GREST CLI
 
-The command line interface for gREST applications
+The command line interface for GREST applications
 
 ## Installation
 
@@ -35,4 +35,4 @@ grest help
 
 ## License
 
-gREST officialy created, used, and maintained by [Zahir](https://zahiraccounting.com) Core Team. gREST is free and open-source software licensed under the [MIT License](https://github.com/zahir-core/grest-cli/blob/main/LICENSE).
+GREST officialy created, used, and maintained by [Zahir](https://zahiraccounting.com) Core Team. GREST is free and open-source software licensed under the [MIT License](https://github.com/zahir-core/grest-cli/blob/main/LICENSE).
