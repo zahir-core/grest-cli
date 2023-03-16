@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 
 	"grest.dev/cmd"
@@ -9,6 +10,9 @@ import (
 var boolVar = false
 
 func main() {
+	survey.ErrorTemplate = `{{color .Icon.Format }}{{ .Error.Error }}{{color "reset"}}
+`
+
 	cobra.EnableCommandSorting = false
 
 	cli := cmd.New()

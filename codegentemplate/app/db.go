@@ -3,7 +3,6 @@ package app
 import (
 	"strings"
 
-	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
@@ -54,9 +53,6 @@ func (d *dbImpl) configure() *dbImpl {
 
 func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
 	dialector := sqlite.Open(c.DSN())
-	if c.Driver == "postgres" {
-		dialector = postgres.Open(c.DSN())
-	}
 	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
 		return err
@@ -75,9 +71,7 @@ func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
 	sqlDB.SetConnMaxLifetime(DB_CONN_MAX_LIFETIME)
 
 	d.RegisterConn(connName, gormDB)
-	if connName == "main" || connName == "membership" {
-		d.setupReplicas(gormDB, c)
-	}
+	d.setupReplicas(gormDB, c)
 	return nil
 }
 
@@ -85,18 +79,12 @@ func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
 func (d *dbImpl) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 	if DB_HOST_READ != "" {
 		dialector := sqlite.Open(c.DSN())
-		if c.Driver == "postgres" {
-			dialector = postgres.Open(c.DSN())
-		}
 		sourcesDialector := []gorm.Dialector{dialector}
 		replicasDialector := []gorm.Dialector{}
 		replicas := strings.Split(DB_HOST_READ, ",")
 		for _, replica := range replicas {
 			c.Host = replica
 			dialector := sqlite.Open(c.DSN())
-			if c.Driver == "postgres" {
-				dialector = postgres.Open(c.DSN())
-			}
 			replicasDialector = append(replicasDialector, dialector)
 		}
 		if len(replicasDialector) == 0 {

@@ -2,15 +2,19 @@ package cmd
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
+
 	"grest.dev/cmd/codegentemplate/app"
 )
 
@@ -22,7 +26,7 @@ type cmdInit struct{}
 func CmdInit() *cobra.Command {
 	return &cobra.Command{
 		Use:     "init",
-		Example: "grest init example.com/org/backend",
+		Example: "grest init",
 		Short:   cmdInit{}.Summary(),
 		Long:    cmdInit{}.Description(),
 		Run:     cmdInit{}.Run,
@@ -43,26 +47,77 @@ Ensure you run this within the root directory of your app.
 }
 
 func (cmdInit) Run(c *cobra.Command, args []string) {
-	if len(args) == 0 {
-		c.Help()
+	err := runInit()
+	if err == nil {
+		fmt.Println("Success!")
 	} else {
-		err := runInit(args[0])
-		if err == nil {
-			fmt.Println("Success!")
-		} else {
-			fmt.Println("Failed!", err.Error())
-		}
+		fmt.Println("Failed!", err.Error())
 	}
 }
 
-func writeGoModFile(name string) error {
-	filename := "go.mod"
-	fmt.Println("writting file :", filename)
-	return os.WriteFile(filename, []byte("module "+name+"\n\ngo "+runtime.Version()[2:6]), 0755)
-}
+func runInit() error {
+	// the questions to ask
+	var qs = []*survey.Question{
+		{
+			Name: "module-path",
+			Prompt: &survey.Input{
+				Message: "Module path:",
+				Help: "A module path is the canonical name for a module, declared with the module directive in the module’s go.mod file. " +
+					"A module’s path is the prefix for package paths within the module.\n\nhttps://go.dev/ref/mod#module-path",
+			},
+			Validate: func(val any) error {
+				if str, ok := val.(string); !ok || !regexp.MustCompile(`^(?i)[a-z0-9]+([a-z0-9._-]*[a-z0-9]+)?(/([a-z0-9._-]*[a-z0-9]+)?)*$`).MatchString(str) {
+					return errors.New("\"" + str + "\" is not a valid module path, see https://go.dev/ref/mod#go-mod-file-ident")
+				}
+				return nil
+			},
+		},
+		{
+			Name:   "project-name",
+			Prompt: &survey.Input{Message: "Project name:"},
+			Validate: func(val any) error {
+				if val == nil {
+					return errors.New("Project name is required")
+				}
+				return nil
+			},
+		},
+		{
+			Name:   "project-description",
+			Prompt: &survey.Input{Message: "Project description:"},
+		},
+		{
+			Name: "database",
+			Prompt: &survey.Select{
+				Message: "Choose a database:",
+				Options: []string{"postgres", "mysql", "sqlserver", "clickhouse", "sqlite", "other"},
+				Default: "sqlite",
+			},
+		},
+		{
+			Name:   "is-add-end-point",
+			Prompt: &survey.Confirm{Message: "Add your first end point?"},
+		},
+	}
+	answer := struct {
+		ModulePath         string `survey:"module-path"`
+		ProjectName        string `survey:"project-name"`
+		ProjectDescription string `survey:"project-description"`
+		Database           string `survey:"database"`
+		IsAddEndPoint      bool   `survey:"is-add-end-point"`
+	}{}
 
-func runInit(name string) error {
-	err := writeGoModFile(name)
+	err := survey.Ask(qs, &answer)
+	if err != nil {
+		return err
+	}
+	if answer.ProjectDescription == "" {
+		answer.ProjectDescription = "The My App API allows you to perform all the operations that you do with our applications.\n" +
+			"My App API is built using REST principles which ensures predictable URLs, uses standard HTTP response codes, authentication, " +
+			"and verbs that makes writing applications easy."
+	}
+
+	err = writeGoModFile(answer.ModulePath)
 	if err != nil {
 		return err
 	}
@@ -83,19 +138,35 @@ func runInit(name string) error {
 				return err
 			}
 			fmt.Println("writting file :", newFileName)
-			newContent := strings.ReplaceAll(string(content), "grest.dev/cmd/codegentemplate", name)
+			newContent := strings.ReplaceAll(string(content), "grest.dev/cmd/codegentemplate", answer.ModulePath)
+			newContent = strings.ReplaceAll(newContent, `o.Info.Description = ""`, `o.Info.Description = "`+answer.ProjectDescription+`"`)
+			newContent = strings.ReplaceAll(newContent, "My App API", answer.ProjectName)
+			if answer.Database != "other" {
+				newContent = strings.ReplaceAll(newContent, "sqlite", answer.Database)
+			}
 			newContent = strings.ReplaceAll(newContent, "23.03.161330", time.Now().Format("2006.01.021504"))
 			newContent = strings.ReplaceAll(newContent, "f4cac8b77a8d4cb5881fac72388bb226", app.NewToken())
 			newContent = strings.ReplaceAll(newContent, "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf", app.NewToken())
 			newContent = strings.ReplaceAll(newContent, "0de0cda7d2dd4937a1c4f7ddc43c580f", app.NewToken())
 			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
-	fmt.Println("go mod tidy...")
+	if answer.Database == "other" {
+		fmt.Println("You choose other database, modify app/db.go with your own database driver setup, see https://gorm.io/docs/connecting_to_the_database.html")
+	}
 	err = exec.Command("go", "mod", "tidy").Run()
 	if err != nil {
 		return err
 	}
+	if answer.IsAddEndPoint {
+		return addEndPoint()
+	}
 	os.Setenv("IS_GENERATE_OPEN_API_DOC", "true")
 	fmt.Println("prepare open api doc...")
 	return exec.Command("go", "run", "main.go").Run()
+}
+
+func writeGoModFile(name string) error {
+	filename := "go.mod"
+	fmt.Println("writting file :", filename)
+	return os.WriteFile(filename, []byte("module "+name+"\n\ngo "+runtime.Version()[2:6]), 0755)
 }

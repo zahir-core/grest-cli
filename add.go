@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -31,5 +33,17 @@ Ensure you run this within the root directory of your app.
 }
 
 func (cmdAdd) Run(c *cobra.Command, args []string) {
-	fmt.Println("add: todo")
+	err := addEndPoint()
+	if err == nil {
+		fmt.Println("Success!")
+	} else {
+		fmt.Println("Failed!", err.Error())
+	}
+}
+
+func addEndPoint() error {
+	fmt.Println("add end point: TODO")
+	os.Setenv("IS_GENERATE_OPEN_API_DOC", "true")
+	fmt.Println("prepare open api doc...")
+	return exec.Command("go", "run", "main.go").Run()
 }

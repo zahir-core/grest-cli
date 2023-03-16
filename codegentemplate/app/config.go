@@ -53,7 +53,7 @@ var (
 	DB_HOST_READ         = ""
 	DB_PORT              = 5432
 	DB_DATABASE          = "data.db"
-	DB_USERNAME          = "postgres"
+	DB_USERNAME          = "sqlite"
 	DB_PASSWORD          = "secret"
 	DB_MAX_OPEN_CONNS    = 0
 	DB_MAX_IDLE_CONNS    = 5

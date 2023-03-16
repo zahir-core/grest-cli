@@ -21,6 +21,7 @@ func (o *openAPIImpl) Configure() *openAPIImpl {
 		{"description": "Local", "url": "http://localhost:4001"},
 	}
 	o.Info.Title = "My App API"
+	o.Info.Description = ""
 	o.Info.Version = APP_VERSION
 	if o.Components == nil {
 		o.Components = map[string]any{}
@@ -66,10 +67,6 @@ func (o *openAPIImpl) Configure() *openAPIImpl {
 	o.Security = []map[string]any{
 		{"bearerTokenAuth": []string{}},
 	}
-	o.Info.Description = `
-The My App API allows you to perform all the operations that you do with our applications.
-My App API is built using REST principles which ensures predictable URLs, uses standard HTTP response codes, authentication, and verbs that makes writing applications easy.
-`
 	return o
 }
 
