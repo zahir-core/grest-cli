@@ -52,7 +52,7 @@ func (c *cryptoImpl) Encrypt(text string) (string, error) {
 
 func (c *cryptoImpl) Decrypt(text string) (string, error) {
 	prefixLength := len([]rune(CRYPTO_PREFIX))
-	if text[:prefixLength] == CRYPTO_PREFIX {
+	if CRYPTO_PREFIX != "" && CRYPTO_PREFIX == text[:prefixLength] {
 		return grest.NewCrypto(c.Key, c.Salt, c.Info).Decrypt(text[prefixLength:])
 	}
 	return grest.NewCrypto(c.Key, c.Salt, c.Info).Decrypt(text)

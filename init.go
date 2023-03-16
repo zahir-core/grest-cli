@@ -8,8 +8,10 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
+	"grest.dev/cmd/codegentemplate/app"
 )
 
 //go:embed all:codegentemplate
@@ -81,12 +83,19 @@ func runInit(name string) error {
 				return err
 			}
 			fmt.Println("writting file :", newFileName)
-			return os.WriteFile(newFileName, []byte(strings.ReplaceAll(string(content), "grest.dev/cmd/codegentemplate", name)), 0755)
+			newContent := strings.ReplaceAll(string(content), "grest.dev/cmd/codegentemplate", name)
+			newContent = strings.ReplaceAll(newContent, "23.03.161330", time.Now().Format("2006.01.021504"))
+			newContent = strings.ReplaceAll(newContent, "f4cac8b77a8d4cb5881fac72388bb226", app.NewToken())
+			newContent = strings.ReplaceAll(newContent, "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf", app.NewToken())
+			newContent = strings.ReplaceAll(newContent, "0de0cda7d2dd4937a1c4f7ddc43c580f", app.NewToken())
+			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
+	fmt.Println("go mod tidy...")
 	err = exec.Command("go", "mod", "tidy").Run()
 	if err != nil {
 		return err
 	}
 	os.Setenv("IS_GENERATE_OPEN_API_DOC", "true")
+	fmt.Println("prepare open api doc...")
 	return exec.Command("go", "run", "main.go").Run()
 }

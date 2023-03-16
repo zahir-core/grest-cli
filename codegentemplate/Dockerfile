@@ -3,11 +3,11 @@ RUN mkdir /app
 WORKDIR /app
 COPY . /app
 RUN go mod tidy
-RUN go build -o /app/codegentemplate main.go
+RUN go build -o /app/main main.go
 
 FROM alpine
 RUN mkdir /app
 WORKDIR /app
-COPY --from=builder /app/codegentemplate /app/codegentemplate
+COPY --from=builder /app/main /app/main
 EXPOSE 4001
-CMD ["/app/codegentemplate"]
+CMD ["/app/main"]

@@ -19,22 +19,6 @@ cp .env-example .env && vi .env
 go run main.go
 ```
 
-## Getting Started with Docker
-1. Make sure you have [Git](https://git-scm.com/) and [Docker](https://docs.docker.com/get-docker/) installed. For windows user, it is recommended to use [Docker Desktop WSL 2 backend](https://docs.docker.com/docker-for-windows/wsl/)
-2. Go to the directory
-	```bash
-	cd codegentemplate
-	```
-3. Build docker image
-	```bash
-	docker build -t codegentemplate .
-	```
-4. Run docker image
-	```bash
-	docker container run -it --rm --env-file .env --network host --name codegentemplate codegentemplate
-	```
-5. Open http://localhost:4001 in browser.
-
 ## Code Documentation
 1. Install godoc
 ```bash

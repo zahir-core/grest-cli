@@ -19,12 +19,13 @@ var isConfigConfigured = false
 
 // default config
 var (
-	APP_VERSION    = "23.01.271145"
-	APP_ENV        = "production"
-	APP_PORT       = "4001"
-	APP_URL        = "http://localhost:4001"
+	APP_VERSION = "23.03.161330"
+
+	APP_ENV  = "local"
+	APP_PORT = "4001"
+	APP_URL  = "http://localhost:4001"
+
 	IS_MAIN_SERVER = true // set to true to run migration, seed and task scheduling
-	IS_ON_PREMISE  = true
 
 	IS_GENERATE_OPEN_API_DOC = false
 
@@ -45,13 +46,13 @@ var (
 	CRYPTO_KEY    = "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf"
 	CRYPTO_SALT   = "0de0cda7d2dd4937a1c4f7ddc43c580f"
 	CRYPTO_INFO   = "info"
-	CRYPTO_PREFIX = "ZHR"
+	CRYPTO_PREFIX = ""
 
-	DB_DRIVER            = "postgres"
+	DB_DRIVER            = "sqlite"
 	DB_HOST              = "127.0.0.1"
 	DB_HOST_READ         = ""
 	DB_PORT              = 5432
-	DB_DATABASE          = "grest"
+	DB_DATABASE          = "data.db"
 	DB_USERNAME          = "postgres"
 	DB_PASSWORD          = "secret"
 	DB_MAX_OPEN_CONNS    = 0
@@ -94,11 +95,12 @@ func (config) configure() {
 
 	grest.LoadEnv("APP_ENV", &APP_ENV)
 	grest.LoadEnv("APP_PORT", &APP_PORT)
+
 	grest.LoadEnv("IS_MAIN_SERVER", &IS_MAIN_SERVER)
-	grest.LoadEnv("IS_ON_PREMISE", &IS_ON_PREMISE)
+
+	grest.LoadEnv("IS_GENERATE_OPEN_API_DOC", &IS_GENERATE_OPEN_API_DOC)
 
 	grest.LoadEnv("ENV_FILE", &ENV_FILE)
-	grest.LoadEnv("IS_GENERATE_OPEN_API_DOC", &IS_GENERATE_OPEN_API_DOC)
 	grest.LoadEnv("IS_USE_MOCK_SERVICE", &IS_USE_MOCK_SERVICE)
 	grest.LoadEnv("IS_USE_MOCK_DB", &IS_USE_MOCK_DB)
 

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 	"grest.dev/grest"
@@ -52,7 +53,10 @@ func (d *dbImpl) configure() *dbImpl {
 }
 
 func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
-	dialector := postgres.Open(c.DSN())
+	dialector := sqlite.Open(c.DSN())
+	if c.Driver == "postgres" {
+		dialector = postgres.Open(c.DSN())
+	}
 	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
 		return err
@@ -80,13 +84,19 @@ func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
 // Automatic read and write connection switching
 func (d *dbImpl) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 	if DB_HOST_READ != "" {
-		dialector := postgres.Open(c.DSN())
+		dialector := sqlite.Open(c.DSN())
+		if c.Driver == "postgres" {
+			dialector = postgres.Open(c.DSN())
+		}
 		sourcesDialector := []gorm.Dialector{dialector}
 		replicasDialector := []gorm.Dialector{}
 		replicas := strings.Split(DB_HOST_READ, ",")
 		for _, replica := range replicas {
 			c.Host = replica
-			dialector := postgres.Open(c.DSN())
+			dialector := sqlite.Open(c.DSN())
+			if c.Driver == "postgres" {
+				dialector = postgres.Open(c.DSN())
+			}
 			replicasDialector = append(replicasDialector, dialector)
 		}
 		if len(replicasDialector) == 0 {

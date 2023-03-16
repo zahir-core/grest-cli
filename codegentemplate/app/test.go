@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
-	"strings"
 	"testing"
 	"text/tabwriter"
 
@@ -18,7 +17,6 @@ import (
 
 const (
 	testDBmain = "db_main_test"
-	testDBCompany = "db_company_test"
 
 	TestInvalidToken        = "invalidToken"
 	TestForbiddenToken      = "forbiddenToken"
@@ -31,7 +29,6 @@ const (
 
 var (
 	TestmainTx *gorm.DB
-	TestCompanyTx *gorm.DB
 )
 
 func TestTx() {
@@ -56,57 +53,18 @@ func TestTx() {
 		}
 	}
 
-	TestCompanyTx, err = DB().Conn(testDBCompany)
-	if err != nil {
-		conf.DbName = testDBCompany
-		err = DB().Connect(testDBCompany, conf)
-		if err != nil {
-			panic(err)
-		}
-		TestCompanyTx, err = DB().Conn(testDBCompany)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
 
 func TestCtx(aclKeys []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := Ctx{
 			mainTx: TestmainTx,
-			companyTx: TestCompanyTx,
-			Lang:      "en",
-			Company: CompanyDB{
-				Slug: testDBCompany,
-			},
+			Lang:   "en",
 			Action: Action{
-				Method:    c.Method(),
-				EndPoint:  c.Path(),
-				CompanyID: testDBCompany,
-			},
-			Auth: Token{
-				ID: NewUUID(),
+				Method:   c.Method(),
+				EndPoint: c.Path(),
 			},
 		}
-
-		acl := map[string]bool{}
-		tokens := strings.Split(c.Get(AuthHeaderKey), " ")
-		token := tokens[0]
-		if len(tokens) > 1 {
-			token = tokens[1]
-		}
-		for _, aclKey := range aclKeys {
-			if token == TestFullAccessToken {
-				acl[aclKey] = true
-			} else {
-				for _, key := range strings.Split(token, ",") {
-					if strings.HasSuffix(aclKey, key) {
-						acl[aclKey] = true
-					}
-				}
-			}
-		}
-		ctx.Auth.Acl = acl
 
 		c.Locals(CtxKey, &ctx)
 		return c.Next()
@@ -114,6 +72,7 @@ func TestCtx(aclKeys []string) fiber.Handler {
 }
 
 // AssertMatchJSONElement checks if values are MatchElementJSON.
+//
 //	TODO :
 //	1. cocokan masing-masing elemen json yang ada di expected
 //	2. Untuk element yang ada di actual tapi tidak ada di expected maka diabaikan.
