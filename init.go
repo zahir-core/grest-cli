@@ -112,7 +112,7 @@ func runInit() error {
 		return err
 	}
 	if answer.ProjectDescription == "" {
-		answer.ProjectDescription = "The My App API allows you to perform all the operations that you do with our applications.\n" +
+		answer.ProjectDescription = "The My App API allows you to perform all the operations that you do with our applications." +
 			"My App API is built using REST principles which ensures predictable URLs, uses standard HTTP response codes, authentication, " +
 			"and verbs that makes writing applications easy."
 	}
