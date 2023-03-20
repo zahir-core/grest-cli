@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"grest.dev/cmd/codegentemplate/app"
+	"grest.dev/grest"
 )
 
 //go:embed all:codegentemplate
@@ -56,18 +57,19 @@ func (cmdInit) Run(c *cobra.Command, args []string) {
 }
 
 func runInit() error {
-	// the questions to ask
 	var qs = []*survey.Question{
 		{
 			Name: "module-path",
 			Prompt: &survey.Input{
 				Message: "Module path:",
 				Help: "A module path is the canonical name for a module, declared with the module directive in the module’s go.mod file. " +
-					"A module’s path is the prefix for package paths within the module.\n\nhttps://go.dev/ref/mod#module-path",
+					"A module’s path is the prefix for package paths within the module.\n\n" +
+					grest.Fmt("See ", grest.FmtHiWhite) + grest.Fmt("https://go.dev/ref/mod#module-path\n", grest.FmtHiBlue),
 			},
 			Validate: func(val any) error {
 				if str, ok := val.(string); !ok || !regexp.MustCompile(`^(?i)[a-z0-9]+([a-z0-9._-]*[a-z0-9]+)?(/([a-z0-9._-]*[a-z0-9]+)?)*$`).MatchString(str) {
-					return errors.New("\"" + str + "\" is not a valid module path, see https://go.dev/ref/mod#go-mod-file-ident")
+					return errors.New("\"" + str + "\" is not a valid module path.\n\n" +
+						grest.Fmt("See ", grest.FmtHiWhite) + grest.Fmt("https://go.dev/ref/mod#go-mod-file-ident\n", grest.FmtHiBlue))
 				}
 				return nil
 			},
@@ -151,18 +153,24 @@ func runInit() error {
 			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
 	if answer.Database == "other" {
-		fmt.Println("You choose other database, modify app/db.go with your own database driver setup, see https://gorm.io/docs/connecting_to_the_database.html")
+		fmt.Println()
+		fmt.Println("You choose", grest.Fmt("other", grest.FmtHiCyan, grest.FmtBold), "database, modify",
+			grest.Fmt("app/db.go", grest.FmtHiGreen, grest.FmtBold), "with your own database driver setup.")
+		fmt.Println("See", grest.Fmt("https://gorm.io/docs/connecting_to_the_database.html", grest.FmtHiBlue))
+		fmt.Println()
+	}
+	if answer.IsAddEndPoint {
+		fmt.Println("----------Add End Point----------")
+		err = addEndPoint(false)
+		if err != nil {
+			return err
+		}
 	}
 	err = exec.Command("go", "mod", "tidy").Run()
 	if err != nil {
 		return err
 	}
-	if answer.IsAddEndPoint {
-		return addEndPoint()
-	}
-	os.Setenv("IS_GENERATE_OPEN_API_DOC", "true")
-	fmt.Println("prepare open api doc...")
-	return exec.Command("go", "run", "main.go").Run()
+	return updateOpenAPI()
 }
 
 func writeGoModFile(name string) error {

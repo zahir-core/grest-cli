@@ -40,7 +40,7 @@ func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
 	res := CodeGenTemplate{}
 
 	// check permission
-	err := u.Ctx.ValidatePermission("acl_key_group.detail")
+	err := u.Ctx.ValidatePermission("end_point.detail")
 	if err != nil {
 		return res, err
 	}
@@ -79,7 +79,7 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 	res := app.ListModel{}
 
 	// check permission
-	err := u.Ctx.ValidatePermission("acl_key_group.list")
+	err := u.Ctx.ValidatePermission("end_point.list")
 	if err != nil {
 		return res, err
 	}
@@ -126,7 +126,7 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 func (u UseCaseHandler) Create(p *ParamCreate) error {
 
 	// check permission
-	err := u.Ctx.ValidatePermission("acl_key_group.create")
+	err := u.Ctx.ValidatePermission("end_point.create")
 	if err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func (u UseCaseHandler) Create(p *ParamCreate) error {
 func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
 
 	// check permission
-	err := u.Ctx.ValidatePermission("acl_key_group.edit")
+	err := u.Ctx.ValidatePermission("end_point.edit")
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
 func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) error {
 
 	// check permission
-	err := u.Ctx.ValidatePermission("acl_key_group.edit")
+	err := u.Ctx.ValidatePermission("end_point.edit")
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) 
 func (u UseCaseHandler) DeleteByID(id string, p *ParamDelete) error {
 
 	// check permission
-	err := u.Ctx.ValidatePermission("acl_key_group.delete")
+	err := u.Ctx.ValidatePermission("end_point.delete")
 	if err != nil {
 		return err
 	}

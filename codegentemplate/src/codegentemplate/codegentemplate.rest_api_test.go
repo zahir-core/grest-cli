@@ -18,15 +18,15 @@ func prepareTest() {
 	app.Config()
 	app.TestTx()
 	app.DB().RegisterTable("main", CodeGenTemplate{})
-	app.DB().MigrateTable(app.TestCompanyTx, "main", app.Setting{})
-	app.TestCompanyTx.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&CodeGenTemplate{})
+	app.DB().MigrateTable(app.TestMainTx, "main", app.Setting{})
+	app.TestMainTx.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&CodeGenTemplate{})
 
 	app.Server().AddMiddleware(app.TestCtx([]string{
-		"data_stores.end_point.detail",
-		"data_stores.end_point.list",
-		"data_stores.end_point.create",
-		"data_stores.end_point.edit",
-		"data_stores.end_point.delete",
+		"end_point.detail",
+		"end_point.list",
+		"end_point.create",
+		"end_point.edit",
+		"end_point.delete",
 	}))
 	app.Server().AddRoute("/end_point", "POST", REST().Create, nil)
 	app.Server().AddRoute("/end_point", "GET", REST().Get, nil)

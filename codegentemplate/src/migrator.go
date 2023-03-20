@@ -24,7 +24,6 @@ type migratorImpl struct {
 }
 
 func (*migratorImpl) Configure() {
-
 	// codegentemplate RegisterTable : DONT REMOVE THIS COMMENT
 }
 

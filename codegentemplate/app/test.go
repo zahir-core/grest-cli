@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	TestmainTx *gorm.DB
+	TestMainTx *gorm.DB
 )
 
 func TestTx() {
@@ -40,14 +40,14 @@ func TestTx() {
 	conf.User = DB_USERNAME
 	conf.Password = DB_PASSWORD
 
-	TestmainTx, err = DB().Conn(testDBmain)
+	TestMainTx, err = DB().Conn(testDBmain)
 	if err != nil {
 		conf.DbName = testDBmain
 		err = DB().Connect(testDBmain, conf)
 		if err != nil {
 			panic(err)
 		}
-		TestmainTx, err = DB().Conn(testDBmain)
+		TestMainTx, err = DB().Conn(testDBmain)
 		if err != nil {
 			panic(err)
 		}
@@ -58,7 +58,7 @@ func TestTx() {
 func TestCtx(aclKeys []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := Ctx{
-			mainTx: TestmainTx,
+			mainTx: TestMainTx,
 			Lang:   "en",
 			Action: Action{
 				Method:   c.Method(),

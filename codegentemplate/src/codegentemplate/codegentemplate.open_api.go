@@ -14,12 +14,12 @@ type OpenAPIOperation struct {
 
 // Base is common detail of end_point open api document component.
 func (o *OpenAPIOperation) Base() {
-	o.Tags = []string{"SchemaCategory - CodeGenTemplate"}
+	o.Tags = []string{"CodeGenTemplate"}
 	o.HeaderParams = []map[string]any{{"$ref": "#/components/parameters/headerParam.Accept-Language"}}
 	o.Responses = map[string]map[string]any{
 		"200": {
 			"description": "Success",
-			"content":     map[string]any{"application/json": &CodeGenTemplate{}}, // will auto create schema $ref: '#/components/schemas/SchemaCategory.CodeGenTemplate' if not exists
+			"content":     map[string]any{"application/json": &CodeGenTemplate{}}, // will auto create schema $ref: '#/components/schemas/CodeGenTemplate' if not exists
 		},
 		"400": app.OpenAPIError().BadRequest(),
 		"401": app.OpenAPIError().Unauthorized(),
@@ -45,7 +45,7 @@ func (o *OpenAPIOperation) Get() *OpenAPIOperation {
 	o.Responses = map[string]map[string]any{
 		"200": {
 			"description": "Success",
-			"content":     map[string]any{"application/json": &CodeGenTemplateList{}}, // will auto create schema $ref: '#/components/schemas/SchemaCategory.CodeGenTemplate.List' if not exists
+			"content":     map[string]any{"application/json": &CodeGenTemplateList{}}, // will auto create schema $ref: '#/components/schemas/CodeGenTemplate.List' if not exists
 		},
 		"400": app.OpenAPIError().BadRequest(),
 		"401": app.OpenAPIError().Unauthorized(),
