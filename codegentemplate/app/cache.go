@@ -18,7 +18,6 @@ func Cache() CacheInterface {
 
 type CacheInterface interface {
 	grest.CacheInterface
-	Invalidate(endPoint string, keys ...string)
 }
 
 var cache *cacheImpl
@@ -51,11 +50,4 @@ func (c *cacheImpl) configure() {
 		c.IsUseRedis = true
 		Logger().Info().Msg("Cache configured with redis.")
 	}
-}
-
-func (c *cacheImpl) Invalidate(endPoint string, keys ...string) {
-	for _, k := range keys {
-		c.Delete(endPoint + "." + k)
-	}
-	go c.DeleteWithPrefix(endPoint + "?")
 }

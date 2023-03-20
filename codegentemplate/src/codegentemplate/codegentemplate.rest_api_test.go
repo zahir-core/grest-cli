@@ -14,14 +14,17 @@ import (
 )
 
 // prepareTest prepares the test.
-func prepareTest() {
+func prepareTest(tb testing.TB) {
 	app.Config()
-	app.TestTx()
+	tx, err := app.Testing().Tx()
+	if err != nil {
+		tb.Fatal(err.Error())
+	}
 	app.DB().RegisterTable("main", CodeGenTemplate{})
-	app.DB().MigrateTable(app.TestMainTx, "main", app.Setting{})
-	app.TestMainTx.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&CodeGenTemplate{})
+	app.DB().MigrateTable(tx, "main", app.Setting{})
+	tx.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&CodeGenTemplate{})
 
-	app.Server().AddMiddleware(app.TestCtx([]string{
+	app.Server().AddMiddleware(app.Testing().NewCtx([]string{
 		"end_point.detail",
 		"end_point.list",
 		"end_point.create",
@@ -107,7 +110,7 @@ var tests = []struct {
 
 // TestCodeGenTemplateREST tests the REST API of CodeGenTemplate data with specified scenario.
 func TestCodeGenTemplateREST(t *testing.T) {
-	prepareTest()
+	prepareTest(t)
 
 	// Iterate through test single test cases
 	for _, test := range tests {
@@ -127,7 +130,7 @@ func TestCodeGenTemplateREST(t *testing.T) {
 		// Verify if the body response is as expected
 		body, err := io.ReadAll(res.Body)
 		utils.AssertEqual(t, nil, err, "io.ReadAll(res.Body)")
-		app.AssertMatchJSONElement(t, []byte(test.expectedBody), body, test.description)
+		app.Testing().AssertMatchJSONElement(t, []byte(test.expectedBody), body, test.description)
 		res.Body.Close()
 	}
 }
@@ -135,7 +138,7 @@ func TestCodeGenTemplateREST(t *testing.T) {
 // BenchmarkCodeGenTemplateREST tests the REST API of CodeGenTemplate data with specified scenario.
 func BenchmarkCodeGenTemplateREST(b *testing.B) {
 	b.ReportAllocs()
-	prepareTest()
+	prepareTest(b)
 	for i := 0; i < b.N; i++ {
 		for _, test := range tests {
 			req := httptest.NewRequest(test.method, test.path, strings.NewReader(test.bodyRequest))

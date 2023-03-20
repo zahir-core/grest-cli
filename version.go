@@ -8,7 +8,7 @@ import (
 	"grest.dev/grest"
 )
 
-const Version = "v0.0.10"
+const Version = "v0.0.11"
 
 type cmdVersion struct{}
 

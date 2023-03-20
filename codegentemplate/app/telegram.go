@@ -2,7 +2,7 @@ package app
 
 import "grest.dev/grest"
 
-func Telegram(text string) TelegramInterface {
+func Telegram() TelegramInterface {
 	if telegram == nil {
 		telegram = &telegramImpl{}
 		telegram.configure()
@@ -23,5 +23,5 @@ type telegramImpl struct {
 
 func (t *telegramImpl) configure() {
 	t.BotToken = TELEGRAM_ALERT_TOKEN
-	t.ChatID = TELEGRAM_ALERT_CHANNEL_ID
+	t.ChatID = TELEGRAM_ALERT_USER_ID
 }

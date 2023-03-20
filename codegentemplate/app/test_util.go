@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	testDBmain = "db_main_test"
+	testMainDB = "main_test.db"
 
 	TestInvalidToken        = "invalidToken"
 	TestForbiddenToken      = "forbiddenToken"
@@ -27,11 +27,15 @@ const (
 	TestFullAccessToken     = "fullAccessToken"
 )
 
-var (
-	TestMainTx *gorm.DB
-)
+func Testing() *testUtil {
+	return &testUtil{}
+}
 
-func TestTx() {
+type testUtil struct {
+	tx *gorm.DB
+}
+
+func (t *testUtil) Tx() (*gorm.DB, error) {
 	var err error
 	conf := grest.DBConfig{}
 	conf.Driver = DB_DRIVER
@@ -40,25 +44,23 @@ func TestTx() {
 	conf.User = DB_USERNAME
 	conf.Password = DB_PASSWORD
 
-	TestMainTx, err = DB().Conn(testDBmain)
+	t.tx, err = DB().Conn(testMainDB)
 	if err != nil {
-		conf.DbName = testDBmain
-		err = DB().Connect(testDBmain, conf)
+		conf.DbName = testMainDB
+		err = DB().Connect(testMainDB, conf)
 		if err != nil {
-			panic(err)
+			return t.tx, err
 		}
-		TestMainTx, err = DB().Conn(testDBmain)
-		if err != nil {
-			panic(err)
-		}
+		t.tx, err = DB().Conn(testMainDB)
 	}
+	return t.tx, err
 
 }
 
-func TestCtx(aclKeys []string) fiber.Handler {
+func (t *testUtil) NewCtx(aclKeys []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := Ctx{
-			mainTx: TestMainTx,
+			mainTx: t.tx,
 			Lang:   "en",
 			Action: Action{
 				Method:   c.Method(),
@@ -80,7 +82,7 @@ func TestCtx(aclKeys []string) fiber.Handler {
 //	4. NullDate bisa dicocokan dengan {date} atau {current_date}
 //	5. NullTime bisa dicocokan dengan {time} atau {current_time}
 //	6. NullDateTime bisa dicocokan dengan {datetime} atau {current_datetime}
-func AssertMatchJSONElement(tb testing.TB, expected, actual []byte, description ...string) {
+func (*testUtil) AssertMatchJSONElement(tb testing.TB, expected, actual []byte, description ...string) {
 	if reflect.DeepEqual(expected, actual) {
 		return
 	}

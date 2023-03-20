@@ -42,11 +42,10 @@ var (
 	LOG_FILE_MAX_AGE        = 7              // days
 	LOG_FILE_MAX_BACKUPS    = 0              // files
 
-	JWT_KEY       = []byte("f4cac8b77a8d4cb5881fac72388bb226")
-	CRYPTO_KEY    = "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf"
-	CRYPTO_SALT   = "0de0cda7d2dd4937a1c4f7ddc43c580f"
-	CRYPTO_INFO   = "info"
-	CRYPTO_PREFIX = ""
+	JWT_KEY     = "f4cac8b77a8d4cb5881fac72388bb226"
+	CRYPTO_KEY  = "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf"
+	CRYPTO_SALT = "0de0cda7d2dd4937a1c4f7ddc43c580f"
+	CRYPTO_INFO = "info"
 
 	DB_DRIVER            = "sqlite"
 	DB_HOST              = "127.0.0.1"
@@ -77,8 +76,8 @@ var (
 	FS_ACCESS_KEY      = ""
 	FS_SECRET_KEY      = ""
 
-	TELEGRAM_ALERT_TOKEN      = ""
-	TELEGRAM_ALERT_CHANNEL_ID = ""
+	TELEGRAM_ALERT_TOKEN   = ""
+	TELEGRAM_ALERT_USER_ID = ""
 )
 
 type config struct{}
@@ -116,7 +115,6 @@ func (config) configure() {
 	grest.LoadEnv("CRYPTO_KEY", &CRYPTO_KEY)
 	grest.LoadEnv("CRYPTO_SALT", &CRYPTO_SALT)
 	grest.LoadEnv("CRYPTO_INFO", &CRYPTO_INFO)
-	grest.LoadEnv("CRYPTO_PREFIX", &CRYPTO_PREFIX)
 
 	grest.LoadEnv("DB_DRIVER", &DB_DRIVER)
 	grest.LoadEnv("DB_HOST", &DB_HOST)
@@ -145,5 +143,5 @@ func (config) configure() {
 	grest.LoadEnv("FS_SECRET_KEY", &FS_SECRET_KEY)
 
 	grest.LoadEnv("TELEGRAM_ALERT_TOKEN", &TELEGRAM_ALERT_TOKEN)
-	grest.LoadEnv("TELEGRAM_ALERT_CHANNEL_ID", &TELEGRAM_ALERT_CHANNEL_ID)
+	grest.LoadEnv("TELEGRAM_ALERT_USER_ID", &TELEGRAM_ALERT_USER_ID)
 }
