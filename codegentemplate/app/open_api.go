@@ -2,20 +2,20 @@ package app
 
 import "grest.dev/grest"
 
-func OpenAPI() *openAPIImpl {
+func OpenAPI() *openAPIUtil {
 	if openAPI == nil {
-		openAPI = &openAPIImpl{}
+		openAPI = &openAPIUtil{}
 	}
 	return openAPI
 }
 
-var openAPI *openAPIImpl
+var openAPI *openAPIUtil
 
-type openAPIImpl struct {
+type openAPIUtil struct {
 	grest.OpenAPI
 }
 
-func (o *openAPIImpl) Configure() *openAPIImpl {
+func (o *openAPIUtil) Configure() *openAPIUtil {
 	o.SetVersion()
 	o.Servers = []map[string]any{
 		{"description": "Local", "url": "http://localhost:4001"},

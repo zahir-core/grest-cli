@@ -14,7 +14,7 @@ import (
 
 func Server() ServerInterface {
 	if server == nil {
-		server = &serverImpl{}
+		server = &serverUtil{}
 		server.configure()
 	}
 	return server
@@ -29,9 +29,9 @@ type ServerInterface interface {
 	Test(req *http.Request, msTimeout ...int) (resp *http.Response, err error)
 }
 
-var server *serverImpl
+var server *serverUtil
 
-type serverImpl struct {
+type serverUtil struct {
 	Addr                  string
 	IsUseTLS              bool
 	CertFile              string
@@ -40,7 +40,7 @@ type serverImpl struct {
 	Fiber                 *fiber.App
 }
 
-func (s *serverImpl) configure() {
+func (s *serverUtil) configure() {
 	s.Addr = ":" + APP_PORT
 	s.Fiber = fiber.New(fiber.Config{
 		ErrorHandler:          ErrorHandler,
@@ -51,7 +51,7 @@ func (s *serverImpl) configure() {
 }
 
 // use grest to add route so it can generate swagger api documentation automatically
-func (s *serverImpl) AddRoute(path, method string, handler fiber.Handler, operation OpenAPIOperationInterface) {
+func (s *serverUtil) AddRoute(path, method string, handler fiber.Handler, operation OpenAPIOperationInterface) {
 	if method == "ALL" {
 		for _, m := range []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"} {
 			s.AddRoute(path, m, handler, operation)
@@ -64,11 +64,11 @@ func (s *serverImpl) AddRoute(path, method string, handler fiber.Handler, operat
 	}
 }
 
-func (s *serverImpl) AddStaticRoute(path string, fsConfig filesystem.Config) {
+func (s *serverUtil) AddStaticRoute(path string, fsConfig filesystem.Config) {
 	s.Fiber.Use(path, filesystem.New(fsConfig))
 }
 
-func (s *serverImpl) AddOpenAPIDoc(path string, f embed.FS) {
+func (s *serverUtil) AddOpenAPIDoc(path string, f embed.FS) {
 	docs, err := fs.Sub(f, "docs")
 	if err != nil {
 		Logger().Fatal().Err(err).Send()
@@ -78,11 +78,11 @@ func (s *serverImpl) AddOpenAPIDoc(path string, f embed.FS) {
 	})
 }
 
-func (s *serverImpl) AddMiddleware(handler fiber.Handler) {
+func (s *serverUtil) AddMiddleware(handler fiber.Handler) {
 	s.Fiber.Use(handler)
 }
 
-func (s *serverImpl) Start() error {
+func (s *serverUtil) Start() error {
 	s.Fiber.Use(NotFoundHandler)
 	if !s.DisableStartupMessage {
 		grest.StartupMessage(s.Addr)
@@ -93,7 +93,7 @@ func (s *serverImpl) Start() error {
 	return s.Fiber.Listen(s.Addr)
 }
 
-func (s *serverImpl) Test(req *http.Request, msTimeout ...int) (*http.Response, error) {
+func (s *serverUtil) Test(req *http.Request, msTimeout ...int) (*http.Response, error) {
 	return s.Fiber.Test(req, msTimeout...)
 }
 

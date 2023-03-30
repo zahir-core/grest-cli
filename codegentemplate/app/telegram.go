@@ -1,27 +1,36 @@
 package app
 
-import "grest.dev/grest"
+import (
+	"mime/multipart"
 
-func Telegram() TelegramInterface {
+	"grest.dev/grest"
+)
+
+func Telegram(message ...string) TelegramInterface {
 	if telegram == nil {
-		telegram = &telegramImpl{}
+		telegram = &telegramUtil{}
 		telegram.configure()
+		if len(message) > 0 {
+			telegram.AddMessage(message[0])
+		}
 	}
 	return telegram
 }
 
 type TelegramInterface interface {
-	grest.TelegramInterface
+	AddMessage(text string)
+	AddAttachment(file *multipart.FileHeader)
+	Send() error
 }
 
-var telegram *telegramImpl
+var telegram *telegramUtil
 
-// telegramImpl implement TelegramInterface embed from grest.Telegram for simplicity
-type telegramImpl struct {
+// telegramUtil implement TelegramInterface embed from grest.Telegram for simplicity
+type telegramUtil struct {
 	grest.Telegram
 }
 
-func (t *telegramImpl) configure() {
+func (t *telegramUtil) configure() {
 	t.BotToken = TELEGRAM_ALERT_TOKEN
 	t.ChatID = TELEGRAM_ALERT_USER_ID
 }

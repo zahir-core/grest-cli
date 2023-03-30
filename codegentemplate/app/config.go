@@ -9,13 +9,12 @@ import (
 )
 
 func Config() {
-	if !isConfigConfigured {
-		config{}.configure()
-		isConfigConfigured = true
+	if config == nil {
+		config = &configUtil{}
+		config.configure()
+		config.isConfigured = true
 	}
 }
-
-var isConfigConfigured = false
 
 // default config
 var (
@@ -80,9 +79,13 @@ var (
 	TELEGRAM_ALERT_USER_ID = ""
 )
 
-type config struct{}
+var config *configUtil
 
-func (config) configure() {
+type configUtil struct {
+	isConfigured bool
+}
+
+func (*configUtil) configure() {
 
 	// set ENV_FILE with absolute path for the .env file to run test with .env
 	envFile := os.Getenv("ENV_FILE")

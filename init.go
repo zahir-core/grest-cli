@@ -147,9 +147,9 @@ func runInit() error {
 				newContent = strings.ReplaceAll(newContent, "sqlite", answer.Database)
 			}
 			newContent = strings.ReplaceAll(newContent, "23.03.161330", time.Now().Format("2006.01.021504"))
-			newContent = strings.ReplaceAll(newContent, "f4cac8b77a8d4cb5881fac72388bb226", app.NewToken())
-			newContent = strings.ReplaceAll(newContent, "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf", app.NewToken())
-			newContent = strings.ReplaceAll(newContent, "0de0cda7d2dd4937a1c4f7ddc43c580f", app.NewToken())
+			newContent = strings.ReplaceAll(newContent, "f4cac8b77a8d4cb5881fac72388bb226", app.Crypto().NewToken())
+			newContent = strings.ReplaceAll(newContent, "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf", app.Crypto().NewToken())
+			newContent = strings.ReplaceAll(newContent, "0de0cda7d2dd4937a1c4f7ddc43c580f", app.Crypto().NewToken())
 			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
 	if answer.Database == "other" {

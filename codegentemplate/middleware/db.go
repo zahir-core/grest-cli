@@ -8,7 +8,18 @@ import (
 	"grest.dev/cmd/codegentemplate/app"
 )
 
-func SetDB(c *fiber.Ctx) error {
+func DB() *dbHandler {
+	if dbh == nil {
+		dbh = &dbHandler{}
+	}
+	return dbh
+}
+
+var dbh *dbHandler
+
+type dbHandler struct{}
+
+func (*dbHandler) New(c *fiber.Ctx) error {
 	ctx, ok := c.Locals(app.CtxKey).(*app.Ctx)
 	if !ok {
 		return app.NewError(http.StatusInternalServerError, "ctx is not found")

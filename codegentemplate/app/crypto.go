@@ -1,28 +1,42 @@
 package app
 
-import "grest.dev/grest"
+import (
+	"strings"
+
+	"github.com/google/uuid"
+	"grest.dev/grest"
+)
 
 func Crypto() CryptoInterface {
 	if crpto == nil {
-		crpto = &cryptoImpl{}
+		crpto = &cryptoUtil{}
 		crpto.configure()
 	}
 	return crpto
 }
 
 type CryptoInterface interface {
-	grest.CryptoInterface
+	NewToken() string
+	NewHash(text string, cost ...int) (string, error)
+	CompareHash(hashed, text string) error
+	NewJWT(claims any) (string, error)
+	ParseAndVerifyJWT(token string, claims any) error
+	Encrypt(text string) (string, error)
+	Decrypt(text string) (string, error)
+	GenerateKey() ([]byte, error)
+	PKCS5Padding(ciphertext []byte, blockSize int) []byte
+	PKCS5Unpadding(encrypt []byte) ([]byte, error)
 }
 
-var crpto *cryptoImpl
+var crpto *cryptoUtil
 
-// cryptoImpl implement CryptoInterface embed from grest.cryptoImpl for simplicity
-type cryptoImpl struct {
+// cryptoUtil implement CryptoInterface embed from grest.cryptoUtil for simplicity
+type cryptoUtil struct {
 	grest.Crypto
 }
 
-func NewCrypto(keys ...string) *cryptoImpl {
-	c := &cryptoImpl{}
+func NewCrypto(keys ...string) *cryptoUtil {
+	c := &cryptoUtil{}
 	c.configure()
 	if len(keys) > 0 {
 		c.Key = keys[0]
@@ -39,9 +53,13 @@ func NewCrypto(keys ...string) *cryptoImpl {
 	return c
 }
 
-func (c *cryptoImpl) configure() {
+func (c *cryptoUtil) configure() {
 	c.Key = CRYPTO_KEY
 	c.Salt = CRYPTO_SALT
 	c.Info = CRYPTO_INFO
 	c.JWTKey = JWT_KEY
+}
+
+func (c *cryptoUtil) NewToken() string {
+	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }

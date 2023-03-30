@@ -1,19 +1,34 @@
 package app
 
-import "grest.dev/grest"
+import (
+	"net/http"
+	"time"
 
-func HttpClient(method, url string) *httpClientImpl {
-	hc := &httpClientImpl{}
+	"grest.dev/grest"
+)
+
+func HttpClient(method, url string) HttpClientInterface {
+	hc := &httpClientUtil{}
 	hc.Method = method
 	hc.Url = url
 	return hc
 }
 
 type HttpClientInterface interface {
-	grest.HttpClientInterface
+	Debug()
+	AddHeader(key, value string)
+	AddMultipartBody(body any) error
+	AddUrlEncodedBody(body any) error
+	AddJsonBody(body any) error
+	AddXmlBody(body any) error
+	SetTimeout(timeout time.Duration)
+	Send() (*http.Response, error)
+	BodyResponseStr() string
+	UnmarshalJson(v any) error
+	UnmarshalXml(v any) error
 }
 
-// httpClientImpl implement HttpClientInterface embed from grest.httpClientImpl for simplicity
-type httpClientImpl struct {
+// httpClientUtil implement HttpClientInterface embed from grest.httpClientUtil for simplicity
+type httpClientUtil struct {
 	grest.HttpClient
 }

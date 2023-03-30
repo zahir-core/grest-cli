@@ -8,17 +8,17 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func Logger() *loggerImpl {
+func Logger() *loggerUtil {
 	if logger == nil {
-		logger = &loggerImpl{}
+		logger = &loggerUtil{}
 		logger.configure()
 	}
 	return logger
 }
 
-var logger *loggerImpl
+var logger *loggerUtil
 
-type loggerImpl struct {
+type loggerUtil struct {
 	zerolog.Logger
 }
 
@@ -35,7 +35,7 @@ type loggerImpl struct {
 // and Kubernetes).
 //
 // The output log file will be located at LOG_FILE_FILENAME and will be rolled according to configuration set.
-func (l *loggerImpl) configure() {
+func (l *loggerUtil) configure() {
 	var writers []io.Writer
 
 	if LOG_CONSOLE_ENABLED {

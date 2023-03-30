@@ -15,16 +15,13 @@ import (
 
 // prepareTest prepares the test.
 func prepareTest(tb testing.TB) {
-	app.Config()
-	tx, err := app.Testing().Tx()
-	if err != nil {
-		tb.Fatal(err.Error())
-	}
+	app.Test()
+	tx := app.Test().Tx
 	app.DB().RegisterTable("main", CodeGenTemplate{})
 	app.DB().MigrateTable(tx, "main", app.Setting{})
 	tx.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&CodeGenTemplate{})
 
-	app.Server().AddMiddleware(app.Testing().NewCtx([]string{
+	app.Server().AddMiddleware(app.Test().NewCtx([]string{
 		"end_point.detail",
 		"end_point.list",
 		"end_point.create",
@@ -130,7 +127,7 @@ func TestCodeGenTemplateREST(t *testing.T) {
 		// Verify if the body response is as expected
 		body, err := io.ReadAll(res.Body)
 		utils.AssertEqual(t, nil, err, "io.ReadAll(res.Body)")
-		app.Testing().AssertMatchJSONElement(t, []byte(test.expectedBody), body, test.description)
+		app.Test().AssertMatchJSONElement(t, []byte(test.expectedBody), body, test.description)
 		res.Body.Close()
 	}
 }

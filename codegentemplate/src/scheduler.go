@@ -6,9 +6,9 @@ import (
 	"grest.dev/cmd/codegentemplate/app"
 )
 
-func Scheduler() *schedulerImpl {
+func Scheduler() *schedulerUtil {
 	if scheduler == nil {
-		scheduler = &schedulerImpl{}
+		scheduler = &schedulerUtil{}
 		if app.APP_ENV == "local" || app.IS_MAIN_SERVER {
 			scheduler.Configure()
 		}
@@ -17,13 +17,13 @@ func Scheduler() *schedulerImpl {
 	return scheduler
 }
 
-var scheduler *schedulerImpl
+var scheduler *schedulerUtil
 
-type schedulerImpl struct {
+type schedulerUtil struct {
 	isConfigured bool
 }
 
-func (s *schedulerImpl) Configure() {
+func (s *schedulerUtil) Configure() {
 	c := cron.New()
 
 	// add scheduler func here, for example :

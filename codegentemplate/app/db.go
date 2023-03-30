@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"strings"
 
 	"gorm.io/driver/sqlite"
@@ -11,24 +12,31 @@ import (
 
 func DB() DBInterface {
 	if db == nil {
-		db = &dbImpl{}
+		db = &dbUtil{}
 		db.configure()
 	}
 	return db
 }
 
 type DBInterface interface {
-	grest.DBInterface
+	RegisterConn(connName string, conn *gorm.DB)
+	Conn(connName string) (*gorm.DB, error)
+	Close()
+	RegisterTable(connName string, t grest.Table) error
+	MigrateTable(tx *gorm.DB, connName string, mTable grest.MigrationTable) error
+	RegisterSeeder(connName, seederKey string, seederHandler grest.SeederHandler) error
+	RunSeeder(tx *gorm.DB, connName string, seedTable grest.SeederTable) error
 	Connect(connName string, c grest.DBConfig) error
+	IsNotFoundError(err error) bool
 }
 
-var db *dbImpl
+var db *dbUtil
 
-type dbImpl struct {
+type dbUtil struct {
 	grest.DB
 }
 
-func (d *dbImpl) configure() *dbImpl {
+func (d *dbUtil) configure() *dbUtil {
 	c := grest.DBConfig{}
 	c.Driver = DB_DRIVER
 	c.Host = DB_HOST
@@ -51,7 +59,7 @@ func (d *dbImpl) configure() *dbImpl {
 	return d
 }
 
-func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
+func (d *dbUtil) Connect(connName string, c grest.DBConfig) error {
 	dialector := sqlite.Open(c.DSN())
 	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
@@ -76,7 +84,7 @@ func (d *dbImpl) Connect(connName string, c grest.DBConfig) error {
 }
 
 // Automatic read and write connection switching
-func (d *dbImpl) setupReplicas(db *gorm.DB, c grest.DBConfig) {
+func (d *dbUtil) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 	if DB_HOST_READ != "" {
 		dialector := sqlite.Open(c.DSN())
 		sourcesDialector := []gorm.Dialector{dialector}
@@ -96,4 +104,8 @@ func (d *dbImpl) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 			Policy:   dbresolver.RandomPolicy{},
 		}))
 	}
+}
+
+func (*dbUtil) IsNotFoundError(err error) bool {
+	return errors.Is(err, gorm.ErrRecordNotFound)
 }

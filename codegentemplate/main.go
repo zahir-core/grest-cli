@@ -23,6 +23,7 @@ func main() {
 	app.Cache()
 	app.Validator()
 	app.DB()
+	defer app.DB().Close()
 	app.Translator()
 	app.FS()
 	app.Server()
@@ -36,7 +37,6 @@ func main() {
 	src.Migrator()
 	src.Seeder()
 	src.Scheduler()
-	defer app.DB().Close()
 	err := app.Server().Start()
 	if err != nil {
 		app.Logger().Fatal().Err(err).Send()

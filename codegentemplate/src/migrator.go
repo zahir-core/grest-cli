@@ -5,9 +5,9 @@ import (
 	// codegentemplate import : DONT REMOVE THIS COMMENT
 )
 
-func Migrator() *migratorImpl {
+func Migrator() *migratorUtil {
 	if migrator == nil {
-		migrator = &migratorImpl{}
+		migrator = &migratorUtil{}
 		migrator.Configure()
 		if app.APP_ENV == "local" || app.IS_MAIN_SERVER {
 			migrator.Run()
@@ -17,17 +17,17 @@ func Migrator() *migratorImpl {
 	return migrator
 }
 
-var migrator *migratorImpl
+var migrator *migratorUtil
 
-type migratorImpl struct {
+type migratorUtil struct {
 	isConfigured bool
 }
 
-func (*migratorImpl) Configure() {
+func (*migratorUtil) Configure() {
 	// codegentemplate RegisterTable : DONT REMOVE THIS COMMENT
 }
 
-func (*migratorImpl) Run() {
+func (*migratorUtil) Run() {
 	tx, err := app.DB().Conn("main")
 	if err != nil {
 		app.Logger().Fatal().Err(err).Send()

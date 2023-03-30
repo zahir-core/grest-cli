@@ -85,6 +85,19 @@ func NewNullDateTime(val time.Time) NullDateTime {
 	return n
 }
 
+// NullUnixTime is nullable Unix DateTime, it embeds a grest.NullUnixTime, so you can add your own method or override grest.NullUnixTime method
+type NullUnixTime struct {
+	grest.NullUnixTime
+}
+
+// NewNullUnixTime return NullUnixTime
+func NewNullUnixTime(val time.Time) NullUnixTime {
+	n := NullUnixTime{}
+	n.Valid = true
+	n.Time = val
+	return n
+}
+
 // NullString is nullable String, it embeds a grest.NullString, so you can add your own method or override grest.NullString method
 type NullString struct {
 	grest.NullString

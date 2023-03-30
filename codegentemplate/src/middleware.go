@@ -5,22 +5,22 @@ import (
 	"grest.dev/cmd/codegentemplate/middleware"
 )
 
-func Middleware() *middlewareImpl {
+func Middleware() *middlewareUtil {
 	if mdlwr == nil {
-		mdlwr = &middlewareImpl{}
+		mdlwr = &middlewareUtil{}
 		mdlwr.Configure()
 		mdlwr.isConfigured = true
 	}
 	return mdlwr
 }
 
-var mdlwr *middlewareImpl
+var mdlwr *middlewareUtil
 
-type middlewareImpl struct {
+type middlewareUtil struct {
 	isConfigured bool
 }
 
-func (*middlewareImpl) Configure() {
-	app.Server().AddMiddleware(middleware.NewCtx)
-	app.Server().AddMiddleware(middleware.SetDB)
+func (*middlewareUtil) Configure() {
+	app.Server().AddMiddleware(middleware.Ctx().New)
+	app.Server().AddMiddleware(middleware.DB().New)
 }

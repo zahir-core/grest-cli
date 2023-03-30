@@ -2,9 +2,9 @@ package src
 
 import "grest.dev/cmd/codegentemplate/app"
 
-func Seeder() *seederImpl {
+func Seeder() *seederUtil {
 	if seeder == nil {
-		seeder = &seederImpl{}
+		seeder = &seederUtil{}
 		seeder.Configure()
 		if app.APP_ENV == "local" || app.IS_MAIN_SERVER {
 			seeder.Run()
@@ -14,16 +14,16 @@ func Seeder() *seederImpl {
 	return seeder
 }
 
-var seeder *seederImpl
+var seeder *seederUtil
 
-type seederImpl struct {
+type seederUtil struct {
 	isConfigured bool
 }
 
-func (s *seederImpl) Configure() {
+func (s *seederUtil) Configure() {
 
 }
 
-func (s *seederImpl) Run() {
+func (s *seederUtil) Run() {
 
 }

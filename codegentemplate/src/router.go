@@ -5,22 +5,22 @@ import (
 	// codegentemplate import : DONT REMOVE THIS COMMENT
 )
 
-func Router() *routerImpl {
+func Router() *routerUtil {
 	if router == nil {
-		router = &routerImpl{}
+		router = &routerUtil{}
 		router.Configure()
 		router.isConfigured = true
 	}
 	return router
 }
 
-var router *routerImpl
+var router *routerUtil
 
-type routerImpl struct {
+type routerUtil struct {
 	isConfigured bool
 }
 
-func (r *routerImpl) Configure() {
+func (r *routerUtil) Configure() {
 	app.Server().AddRoute("/api/version", "GET", app.VersionHandler, nil)
 
 	// codegentemplate AddRoute : DONT REMOVE THIS COMMENT

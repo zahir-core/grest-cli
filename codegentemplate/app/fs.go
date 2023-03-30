@@ -12,7 +12,7 @@ import (
 
 func FS() FSInterface {
 	if fsClient == nil {
-		fsClient = fsImpl{}.configure()
+		fsClient = fsUtil{}.configure()
 	}
 	return fsClient
 }
@@ -23,9 +23,9 @@ type FSInterface interface {
 	Delete(fileName string, opts ...FileDeleteOption) error
 }
 
-var fsClient *fsImpl
+var fsClient *fsUtil
 
-type fsImpl struct {
+type fsUtil struct {
 	Driver        string
 	LocalDirPath  string
 	PublicDirPath string
@@ -40,7 +40,7 @@ type fsImpl struct {
 	err           error
 }
 
-func (f fsImpl) configure() *fsImpl {
+func (f fsUtil) configure() *fsUtil {
 	if FS_DRIVER == "local" {
 		return f.setLocalFS()
 	}
@@ -72,7 +72,7 @@ func (f fsImpl) configure() *fsImpl {
 	return &f
 }
 
-func (f fsImpl) setLocalFS() *fsImpl {
+func (f fsUtil) setLocalFS() *fsUtil {
 	if f.err != nil {
 		Logger().Error().Msg(f.err.Error() + ", local filesystem will be used.")
 	}
@@ -89,7 +89,7 @@ func (f fsImpl) setLocalFS() *fsImpl {
 	return &f
 }
 
-func (f fsImpl) createLocalDirPath() {
+func (f fsUtil) createLocalDirPath() {
 	_, err := os.Stat(f.LocalDirPath)
 	if os.IsNotExist(err) {
 		err = os.Mkdir(f.LocalDirPath, 0755)
@@ -103,7 +103,7 @@ func (f fsImpl) createLocalDirPath() {
 	}
 }
 
-func (f *fsImpl) GetFileUrl(fileName string, path ...string) string {
+func (f *fsUtil) GetFileUrl(fileName string, path ...string) string {
 	res := APP_URL + "/" + f.PublicDirPath
 	if f.EndPoint == "s3.amazonaws.com" {
 		res = "https://" + f.BucketName + ".s3." + f.Region + ".amazonaws.com/"
@@ -120,7 +120,7 @@ func (f *fsImpl) GetFileUrl(fileName string, path ...string) string {
 	return res
 }
 
-func (f *fsImpl) Upload(fileName string, src io.Reader, fileSize int64, opts ...FileUploadOption) (FileUploadInfo, error) {
+func (f *fsUtil) Upload(fileName string, src io.Reader, fileSize int64, opts ...FileUploadOption) (FileUploadInfo, error) {
 	if f.Driver == "local" {
 		dst, err := os.Create(f.LocalDirPath + "/" + fileName)
 		if err != nil {
@@ -140,7 +140,7 @@ func (f *fsImpl) Upload(fileName string, src io.Reader, fileSize int64, opts ...
 	return FileUploadInfo{info}, err
 }
 
-func (f *fsImpl) Delete(fileName string, opts ...FileDeleteOption) error {
+func (f *fsUtil) Delete(fileName string, opts ...FileDeleteOption) error {
 	if f.Driver == "local" {
 		return os.Remove(f.LocalDirPath + "/" + fileName)
 	}

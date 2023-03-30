@@ -10,24 +10,29 @@ import (
 
 func Cache() CacheInterface {
 	if cache == nil {
-		cache = &cacheImpl{}
+		cache = &cacheUtil{}
 		cache.configure()
 	}
 	return cache
 }
 
 type CacheInterface interface {
-	grest.CacheInterface
+	Get(key string, val any) error
+	Set(key string, val any, e ...time.Duration) error
+	Delete(key string) error
+	DeleteWithPrefix(prefix string) error
+	Invalidate(prefix string, keys ...string)
+	Clear() error
 }
 
-var cache *cacheImpl
+var cache *cacheUtil
 
-// cacheImpl implement CacheInterface embed from grest.Cache for simplicity
-type cacheImpl struct {
+// cacheUtil implement CacheInterface embed from grest.Cache for simplicity
+type cacheUtil struct {
 	grest.Cache
 }
 
-func (c *cacheImpl) configure() {
+func (c *cacheUtil) configure() {
 	c.Exp = 24 * time.Hour
 	c.RedisClient = redis.NewClient(&redis.Options{
 		Addr:     REDIS_HOST + ":" + REDIS_PORT,

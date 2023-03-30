@@ -10,24 +10,25 @@ import (
 
 func Validator() ValidatorInterface {
 	if validator == nil {
-		validator = &validatorImpl{}
+		validator = &validatorUtil{}
 		validator.configure()
 	}
 	return validator
 }
 
 type ValidatorInterface interface {
-	grest.ValidatorInterface
+	IsValid(val any, tag string) bool
+	ValidateStruct(val any, lang string) error
 }
 
-var validator *validatorImpl
+var validator *validatorUtil
 
-// validatorImpl implement ValidatorInterface embed from grest.Validator for simplicity
-type validatorImpl struct {
+// validatorUtil implement ValidatorInterface embed from grest.Validator for simplicity
+type validatorUtil struct {
 	grest.Validator
 }
 
-func (v *validatorImpl) configure() {
+func (v *validatorUtil) configure() {
 	v.New()
 	v.RegisterCustomTypeFunc(v.ValidateValuer,
 		NullBool{},

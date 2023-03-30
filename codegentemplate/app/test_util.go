@@ -27,15 +27,21 @@ const (
 	TestFullAccessToken     = "fullAccessToken"
 )
 
-func Testing() *testUtil {
-	return &testUtil{}
+func Test() *testUtil {
+	if tu == nil {
+		tu = &testUtil{}
+		tu.configure()
+	}
+	return tu
 }
+
+var tu *testUtil
 
 type testUtil struct {
-	tx *gorm.DB
+	Tx *gorm.DB
 }
 
-func (t *testUtil) Tx() (*gorm.DB, error) {
+func (t *testUtil) configure() {
 	var err error
 	conf := grest.DBConfig{}
 	conf.Driver = DB_DRIVER
@@ -44,23 +50,24 @@ func (t *testUtil) Tx() (*gorm.DB, error) {
 	conf.User = DB_USERNAME
 	conf.Password = DB_PASSWORD
 
-	t.tx, err = DB().Conn(testMainDB)
+	t.Tx, err = DB().Conn(testMainDB)
 	if err != nil {
 		conf.DbName = testMainDB
 		err = DB().Connect(testMainDB, conf)
 		if err != nil {
-			return t.tx, err
+			panic(err)
 		}
-		t.tx, err = DB().Conn(testMainDB)
+		t.Tx, err = DB().Conn(testMainDB)
+		if err != nil {
+			panic(err)
+		}
 	}
-	return t.tx, err
-
 }
 
 func (t *testUtil) NewCtx(aclKeys []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := Ctx{
-			mainTx: t.tx,
+			mainTx: t.Tx,
 			Lang:   "en",
 			Action: Action{
 				Method:   c.Method(),
