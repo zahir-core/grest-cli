@@ -17,7 +17,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	gorm.io/driver/sqlite v1.4.4
+	gorm.io/driver/postgres v1.5.0
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 	gorm.io/plugin/dbresolver v1.4.1
 	grest.dev/grest v0.0.0-20230329054921-d8575ad8e8f3
@@ -43,7 +43,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
-	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
@@ -67,5 +66,4 @@ require (
 	golang.org/x/text v0.8.0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gorm.io/driver/postgres v1.5.0 // indirect
 )

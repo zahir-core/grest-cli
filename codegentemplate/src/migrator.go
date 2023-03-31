@@ -2,7 +2,7 @@ package src
 
 import (
 	"grest.dev/cmd/codegentemplate/app"
-	// codegentemplate import : DONT REMOVE THIS COMMENT
+	// import : DONT REMOVE THIS COMMENT
 )
 
 func Migrator() *migratorUtil {
@@ -24,7 +24,7 @@ type migratorUtil struct {
 }
 
 func (*migratorUtil) Configure() {
-	// codegentemplate RegisterTable : DONT REMOVE THIS COMMENT
+	// RegisterTable : DONT REMOVE THIS COMMENT
 }
 
 func (*migratorUtil) Run() {

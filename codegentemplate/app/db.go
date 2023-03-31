@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 	"grest.dev/grest"
@@ -60,7 +60,7 @@ func (d *dbUtil) configure() *dbUtil {
 }
 
 func (d *dbUtil) Connect(connName string, c grest.DBConfig) error {
-	dialector := sqlite.Open(c.DSN())
+	dialector := postgres.Open(c.DSN())
 	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
 		return err
@@ -86,13 +86,13 @@ func (d *dbUtil) Connect(connName string, c grest.DBConfig) error {
 // Automatic read and write connection switching
 func (d *dbUtil) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 	if DB_HOST_READ != "" {
-		dialector := sqlite.Open(c.DSN())
+		dialector := postgres.Open(c.DSN())
 		sourcesDialector := []gorm.Dialector{dialector}
 		replicasDialector := []gorm.Dialector{}
 		replicas := strings.Split(DB_HOST_READ, ",")
 		for _, replica := range replicas {
 			c.Host = replica
-			dialector := sqlite.Open(c.DSN())
+			dialector := postgres.Open(c.DSN())
 			replicasDialector = append(replicasDialector, dialector)
 		}
 		if len(replicasDialector) == 0 {

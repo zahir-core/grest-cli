@@ -46,12 +46,12 @@ var (
 	CRYPTO_SALT = "0de0cda7d2dd4937a1c4f7ddc43c580f"
 	CRYPTO_INFO = "info"
 
-	DB_DRIVER            = "sqlite"
+	DB_DRIVER            = "postgres"
 	DB_HOST              = "127.0.0.1"
 	DB_HOST_READ         = ""
 	DB_PORT              = 5432
 	DB_DATABASE          = "data.db"
-	DB_USERNAME          = "sqlite"
+	DB_USERNAME          = "postgres"
 	DB_PASSWORD          = "secret"
 	DB_MAX_OPEN_CONNS    = 0
 	DB_MAX_IDLE_CONNS    = 5

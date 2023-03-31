@@ -144,7 +144,7 @@ func runInit() error {
 			newContent = strings.ReplaceAll(newContent, `o.Info.Description = ""`, `o.Info.Description = "`+answer.ProjectDescription+`"`)
 			newContent = strings.ReplaceAll(newContent, "My App API", answer.ProjectName)
 			if answer.Database != "other" {
-				newContent = strings.ReplaceAll(newContent, "sqlite", answer.Database)
+				newContent = strings.ReplaceAll(newContent, "postgres", answer.Database)
 			}
 			newContent = strings.ReplaceAll(newContent, "23.03.161330", time.Now().Format("2006.01.021504"))
 			newContent = strings.ReplaceAll(newContent, "f4cac8b77a8d4cb5881fac72388bb226", app.Crypto().NewToken())

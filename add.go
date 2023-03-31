@@ -188,7 +188,7 @@ func addEndPoint(isUpdateOpenAPI bool) error {
 			newContent := strings.ReplaceAll(string(content), "codegentemplate", packagePath)
 			newContent = strings.ReplaceAll(newContent, "CodeGenTemplate", modelStructName)
 			newContent = strings.ReplaceAll(newContent, "end_point", endPoint)
-			newContent = strings.ReplaceAll(newContent, "// "+packagePath+" AddField : DONT REMOVE THIS COMMENT\n", newFieldStr)
+			newContent = strings.ReplaceAll(newContent, "// AddField : DONT REMOVE THIS COMMENT\n", newFieldStr)
 			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
 	grest.FormatFile(packagePathWithPrefix)
@@ -213,15 +213,15 @@ func addEndPoint(isUpdateOpenAPI bool) error {
 		if err != nil {
 			return err
 		}
-		importSection := "// codegentemplate import : DONT REMOVE THIS COMMENT"
+		importSection := "// import : DONT REMOVE THIS COMMENT"
 		newImportSection := `"` + baseModulePath + "/" + packagePathWithPrefix + `"` + "\n" + importSection
 		newContent := strings.Replace(string(content), importSection, newImportSection, 1)
 
-		registerTableSection := "// codegentemplate RegisterTable : DONT REMOVE THIS COMMENT"
+		registerTableSection := "// RegisterTable : DONT REMOVE THIS COMMENT"
 		newRegisterTableSection := `app.DB().RegisterTable("main", ` + packagePath + "." + modelStructName + "{})\n" + registerTableSection
 		newContent = strings.Replace(newContent, registerTableSection, newRegisterTableSection, 1)
 
-		addRouteSection := "// codegentemplate AddRoute : DONT REMOVE THIS COMMENT"
+		addRouteSection := "// AddRoute : DONT REMOVE THIS COMMENT"
 		newAddRouteSection := `
 			app.Server().AddRoute("/codegentemplate", "POST", codegentemplate.REST().Create, codegentemplate.OpenAPI().Create())
 			app.Server().AddRoute("/codegentemplate", "GET", codegentemplate.REST().Get, codegentemplate.OpenAPI().Get())
@@ -230,7 +230,7 @@ func addEndPoint(isUpdateOpenAPI bool) error {
 			app.Server().AddRoute("/codegentemplate/{id}", "PATCH", codegentemplate.REST().PartiallyUpdateByID, codegentemplate.OpenAPI().PartiallyUpdateByID())
 			app.Server().AddRoute("/codegentemplate/{id}", "DELETE", codegentemplate.REST().DeleteByID, codegentemplate.OpenAPI().DeleteByID())
 
-			// codegen AddRoute : DONT REMOVE THIS COMMENT`
+			// AddRoute : DONT REMOVE THIS COMMENT`
 		newAddRouteSection = strings.ReplaceAll(newAddRouteSection, "/codegentemplate", endPointPath)
 		newAddRouteSection = strings.ReplaceAll(newAddRouteSection, "codegentemplate", packagePath)
 		newContent = strings.Replace(newContent, addRouteSection, newAddRouteSection, 1)

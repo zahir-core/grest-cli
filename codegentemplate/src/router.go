@@ -2,7 +2,7 @@ package src
 
 import (
 	"grest.dev/cmd/codegentemplate/app"
-	// codegentemplate import : DONT REMOVE THIS COMMENT
+	// import : DONT REMOVE THIS COMMENT
 )
 
 func Router() *routerUtil {
@@ -23,5 +23,5 @@ type routerUtil struct {
 func (r *routerUtil) Configure() {
 	app.Server().AddRoute("/api/version", "GET", app.VersionHandler, nil)
 
-	// codegentemplate AddRoute : DONT REMOVE THIS COMMENT
+	// AddRoute : DONT REMOVE THIS COMMENT
 }
