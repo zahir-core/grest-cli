@@ -169,7 +169,7 @@ func addEndPoint(isUpdateOpenAPI bool) error {
 			if err != nil {
 				return err
 			}
-			newFileName := strings.Replace(fileName, "src/codegentemplate/codegentemplate", packagePathWithPrefix+"/"+packagePath, 1)
+			newFileName := strings.Replace(fileName, filepath.FromSlash("src/codegentemplate/codegentemplate"), packagePathWithPrefix+"/"+packagePath, 1)
 			if info.IsDir() {
 				if newFileName == "codegentemplate" {
 					return nil
@@ -205,6 +205,7 @@ func addEndPoint(isUpdateOpenAPI bool) error {
 	baseModulePath = strings.Replace(baseModulePath, "module ", "", 1)
 
 	for _, fileName := range []string{"src/migrator.go", "src/router.go"} {
+		fmt.Println("updating file :", fileName)
 		file, err := os.Open(fileName)
 		if err != nil {
 			return err
