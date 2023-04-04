@@ -8,7 +8,7 @@ import (
 // add your mock service here, for example :
 //
 //	// original func (add IS_USE_MOCK_SERVICE_ABC and IS_USE_MOCK_SUCCESS to config)
-//	func (*mockHandler) CallServiceABC(ctx *Ctx, param RequestServiceABC) (ResponseServiceABC, error) {
+//	func (*UseCaseHandler) CallServiceABC(ctx *Ctx, param RequestServiceABC) (ResponseServiceABC, error) {
 //		if IS_USE_MOCK_SERVICE_ABC {
 //			return Mock().CallServiceABC(ctx, param)
 //		}

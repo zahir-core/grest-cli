@@ -22,10 +22,10 @@ func main() {
 	app.Logger()
 	app.Cache()
 	app.Validator()
-	app.DB()
-	defer app.DB().Close()
 	app.Translator()
 	app.FS()
+	app.DB()
+	defer app.DB().Close()
 	app.Server()
 
 	if app.APP_ENV != "production" {

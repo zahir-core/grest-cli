@@ -123,6 +123,7 @@ func runInit() error {
 	if err != nil {
 		return err
 	}
+	mp := strings.Split(answer.ModulePath, "/")
 	fs.WalkDir(f, "codegentemplate",
 		func(fileName string, info fs.DirEntry, err error) error {
 			if err != nil {
@@ -150,6 +151,9 @@ func runInit() error {
 			newContent = strings.ReplaceAll(newContent, "f4cac8b77a8d4cb5881fac72388bb226", app.Crypto().NewToken())
 			newContent = strings.ReplaceAll(newContent, "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf", app.Crypto().NewToken())
 			newContent = strings.ReplaceAll(newContent, "0de0cda7d2dd4937a1c4f7ddc43c580f", app.Crypto().NewToken())
+			if newFileName == "README.md" {
+				newContent = strings.ReplaceAll(newContent, "codegentemplate", mp[len(mp)-1])
+			}
 			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
 	if answer.Database == "other" {

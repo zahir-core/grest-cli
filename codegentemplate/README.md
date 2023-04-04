@@ -42,7 +42,7 @@ go run main.go
 3. Open http://localhost:4001/api/docs in browser
 
 ## Test
-1. Make sure you have db with name db_main_test and db_company_test with credentials same as DB_XXX
+1. Make sure you have db with name `main_test.db` with credentials same as DB_XXX
 2. Test all with verbose output that lists all of the tests and their results.
 ```bash
 ENV_FILE=$(pwd)/.env go test ./... -v
