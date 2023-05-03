@@ -46,7 +46,7 @@ func PaginationInfo(db *gorm.DB, model ModelInterface, query url.Values) (int64,
 	var err error
 	count, page, perPage, pageCount := int64(0), 0, 0, 0
 	if query.Get(grest.QueryDisablePagination) == "true" {
-		return count, page, perPage, pageCount, err
+		return count, page, -1, pageCount, err
 	}
 
 	q := &dbQuery{}

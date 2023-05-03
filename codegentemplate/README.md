@@ -33,7 +33,7 @@ godoc -http=:6060
 ## Open API Documentation
 1. Update your open api documentation
 ```bash
-IS_GENERATE_OPEN_API_DOC=true go run main.go
+go run main.go update
 ```
 2. Start
 ```bash

@@ -253,5 +253,5 @@ func updateOpenAPI() error {
 	fmt.Println("prepare open api doc...")
 	fmt.Println()
 	os.Setenv("IS_GENERATE_OPEN_API_DOC", "true")
-	return exec.Command("go", "run", "main.go").Run()
+	return exec.Command("go", "run", "main.go", "update").Run()
 }

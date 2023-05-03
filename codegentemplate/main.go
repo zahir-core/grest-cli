@@ -13,7 +13,8 @@ var f embed.FS
 
 func main() {
 	app.Config()
-	if app.IS_GENERATE_OPEN_API_DOC {
+	if len(os.Args) == 2 && os.Args[1] == "update" {
+		app.IS_GENERATE_OPEN_API_DOC = true
 		src.Router()
 		app.OpenAPI().Configure().Generate()
 		os.Exit(0)
