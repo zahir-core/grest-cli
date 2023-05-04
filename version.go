@@ -8,7 +8,7 @@ import (
 	"grest.dev/grest"
 )
 
-const Version = "v0.0.17"
+const Version = "v0.0.18"
 
 type cmdVersion struct{}
 
@@ -41,7 +41,7 @@ func PrintVersion() {
 
 func GetVersion() string {
 	msg := strings.Builder{}
-	msg.WriteString(grest.Fmt(`        ________________________________________`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`        __________________________________________`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
 	msg.WriteString(grest.Fmt(`       /        `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
@@ -50,7 +50,7 @@ func GetVersion() string {
 	msg.WriteString(grest.Fmt(`____`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(`____`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(`_____ `, grest.FmtBlue, grest.FmtBold))
-	msg.WriteString(grest.Fmt(`       /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`         /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
 	msg.WriteString(grest.Fmt(`      /    `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
@@ -58,7 +58,8 @@ func GetVersion() string {
 	msg.WriteString(grest.Fmt(` _ \`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(`/ __/`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(` __/`, grest.FmtBlue, grest.FmtBold))
-	msg.WriteString(grest.Fmt(`_  _/ `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`_  _/`, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`CLI`, grest.FmtHiCyan, grest.FmtBold))
 	msg.WriteString(grest.Fmt(`      /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
@@ -67,8 +68,8 @@ func GetVersion() string {
 	msg.WriteString(grest.Fmt(` / _/`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(` _/`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(`_\ \`, grest.FmtBlue, grest.FmtBold))
-	msg.WriteString(grest.Fmt(`  / /  `, grest.FmtBlue, grest.FmtBold))
-	msg.WriteString(grest.Fmt(`      /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`  / / `, grest.FmtBlue, grest.FmtBold))
+	msg.WriteString(grest.Fmt(`         /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
 	msg.WriteString(grest.Fmt(`    /     `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
@@ -77,25 +78,28 @@ func GetVersion() string {
 	msg.WriteString(grest.Fmt(`___/`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(`___/`, grest.FmtBlue, grest.FmtBold))
 	msg.WriteString(grest.Fmt(` /_/ `, grest.FmtBlue, grest.FmtBold))
-	msg.WriteString(grest.Fmt(`CLI`, grest.FmtHiCyan, grest.FmtBold))
-	msg.WriteString(grest.Fmt(`    /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
-	msg.WriteString("\n")
-
-	msg.WriteString(grest.Fmt(`   /                                      /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
-	msg.WriteString("\n")
-
-	msg.WriteString(grest.Fmt(`  /               `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString(grest.Fmt(" ", grest.FmtBgRed))
 	msg.WriteString(grest.Fmt(Version, grest.FmtBgRed, grest.FmtBold))
 	msg.WriteString(grest.Fmt(" ", grest.FmtBgRed))
-	msg.WriteString(grest.Fmt(`               /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`/`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString("\n")
+
+	msg.WriteString(grest.Fmt(`   /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(` An instant, full-featured and scalable `)
+	msg.WriteString(grest.Fmt(`/`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString("\n")
+
+	msg.WriteString(grest.Fmt(`  /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(`       REST APIs framework for `)
+	msg.WriteString(grest.Fmt(`Go`, grest.FmtHiCyan, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`       /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
 	msg.WriteString(grest.Fmt(` /             `, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString(grest.Fmt("https://grest.dev", grest.FmtBlue))
-	msg.WriteString(grest.Fmt(`        /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`          /`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	msg.WriteString("\n")
 
-	msg.WriteString(grest.Fmt(`/______________________________________/`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
+	msg.WriteString(grest.Fmt(`/________________________________________/`, grest.FmtHiMagenta, grest.FmtBold, grest.FmtItalic))
 	return msg.String()
 }
