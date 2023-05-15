@@ -98,13 +98,25 @@ func (s *serverUtil) Test(req *http.Request, msTimeout ...int) (*http.Response, 
 }
 
 func ParseQuery(c *fiber.Ctx) url.Values {
-	u := c.OriginalURL()
-	q := strings.Split(u, "?")
-	if len(q) > 1 {
-		query, _ := url.ParseQuery(q[1])
-		return query
+	query := url.Values{}
+	_, qs, _ := strings.Cut(c.OriginalURL(), "?")
+	for qs != "" {
+		q := ""
+		q, qs, _ = strings.Cut(qs, "&")
+		if q == "" || strings.Contains(q, ";") {
+			continue
+		}
+
+		key, value, _ := strings.Cut(q, "=")
+		if k, err := url.QueryUnescape(key); err == nil {
+			key = k
+		}
+		if v, err := url.QueryUnescape(value); err == nil {
+			value = v
+		}
+		query.Add(key, value)
 	}
-	return url.Values{}
+	return query
 }
 
 func VersionHandler(c *fiber.Ctx) error {
