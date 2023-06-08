@@ -22,7 +22,7 @@ type dbHandler struct{}
 func (*dbHandler) New(c *fiber.Ctx) error {
 	ctx, ok := c.Locals(app.CtxKey).(*app.Ctx)
 	if !ok {
-		return app.NewError(http.StatusInternalServerError, "ctx is not found")
+		return app.Error().New(http.StatusInternalServerError, "ctx is not found")
 	}
 	ctx.TxBegin()
 	err := c.Next()

@@ -8,6 +8,9 @@ import (
 	"grest.dev/grest"
 )
 
+// Config initializes the configuration (config) if it is not already initialized.
+// If config is not initialized, it creates a new configUtil instance, configures it, and assigns it to config.
+// It ensures that only one instance of config is created and reused.
 func Config() {
 	if config == nil {
 		config = &configUtil{}
@@ -16,7 +19,8 @@ func Config() {
 	}
 }
 
-// default config
+// These variables represent various configuration settings used by the application.
+// Each variable is assigned a default value or a value loaded from environment variables.
 var (
 	APP_VERSION = "23.03.161330"
 
@@ -34,7 +38,7 @@ var (
 	IS_USE_MOCK_DB      = false
 
 	LOG_CONSOLE_ENABLED     = true           // print log to the terminal
-	LOG_FILE_ENABLED        = true           // log to a file. the fields below can be skipped if this value is false
+	LOG_FILE_ENABLED        = false          // log to a file. the fields below can be skipped if this value is false
 	LOG_FILE_USE_LOCAL_TIME = true           // if false log rotation filename will be use UTC time
 	LOG_FILE_FILENAME       = "logs/api.log" //
 	LOG_FILE_MAX_SIZE       = 100            // MB
@@ -79,12 +83,18 @@ var (
 	TELEGRAM_ALERT_USER_ID = ""
 )
 
+// config is a pointer to a configUtil instance.
+// It is used to store and access the configuration settings.
 var config *configUtil
 
+// configUtil represents the application's configuration utility.
 type configUtil struct {
 	isConfigured bool
 }
 
+// configure configures the application's settings by loading values from environment variables using the grest.LoadEnv function.
+// Each configuration setting is loaded from the corresponding environment variable and assigned to the appropriate variable.
+// The godotenv package is used to load the .env file if provided.
 func (*configUtil) configure() {
 
 	// set ENV_FILE with absolute path for the .env file to run test with .env
@@ -97,10 +107,9 @@ func (*configUtil) configure() {
 
 	grest.LoadEnv("APP_ENV", &APP_ENV)
 	grest.LoadEnv("APP_PORT", &APP_PORT)
+	grest.LoadEnv("APP_URL", &APP_URL)
 
 	grest.LoadEnv("IS_MAIN_SERVER", &IS_MAIN_SERVER)
-
-	grest.LoadEnv("IS_GENERATE_OPEN_API_DOC", &IS_GENERATE_OPEN_API_DOC)
 
 	grest.LoadEnv("ENV_FILE", &ENV_FILE)
 	grest.LoadEnv("IS_USE_MOCK_SERVICE", &IS_USE_MOCK_SERVICE)

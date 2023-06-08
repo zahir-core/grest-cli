@@ -55,7 +55,7 @@ func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
 	// prepare db for current ctx
 	tx, err := u.Ctx.DB()
 	if err != nil {
-		return res, app.NewError(http.StatusInternalServerError, err.Error())
+		return res, app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// get from db
@@ -64,7 +64,7 @@ func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
 		key = "code"
 	}
 	u.Query.Add(key, id)
-	err = app.First(tx, &res, u.Query)
+	err = app.Query().First(tx, &res, u.Query)
 	if err != nil {
 		return res, u.Ctx.NotFoundError(err, u.EndPoint(), key, id)
 	}
@@ -93,7 +93,7 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 	// prepare db for current ctx
 	tx, err := u.Ctx.DB()
 	if err != nil {
-		return res, app.NewError(http.StatusInternalServerError, err.Error())
+		return res, app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// set pagination info
@@ -101,9 +101,9 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 		res.PageContext.Page,
 		res.PageContext.PerPage,
 		res.PageContext.PageCount,
-		err = app.PaginationInfo(tx, &CodeGenTemplate{}, u.Query)
+		err = app.Query().PaginationInfo(tx, &CodeGenTemplate{}, u.Query)
 	if err != nil {
-		return res, app.NewError(http.StatusInternalServerError, err.Error())
+		return res, app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 	// return data count if $per_page set to 0
 	if res.PageContext.PerPage == 0 {
@@ -111,9 +111,9 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 	}
 
 	// find data
-	data, err := app.Find(tx, &CodeGenTemplate{}, u.Query)
+	data, err := app.Query().Find(tx, &CodeGenTemplate{}, u.Query)
 	if err != nil {
-		return res, app.NewError(http.StatusInternalServerError, err.Error())
+		return res, app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 	res.SetData(data, u.Query)
 
@@ -146,13 +146,13 @@ func (u UseCaseHandler) Create(p *ParamCreate) error {
 	// prepare db for current ctx
 	tx, err := u.Ctx.DB()
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// save data to db
 	err = tx.Model(&p).Create(&p).Error
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
@@ -193,13 +193,13 @@ func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
 	// prepare db for current ctx
 	tx, err := u.Ctx.DB()
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// update data on the db
 	err = tx.Model(&p).Where("id = ?", old.ID).Updates(p).Error
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
@@ -240,13 +240,13 @@ func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) 
 	// prepare db for current ctx
 	tx, err := u.Ctx.DB()
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// update data on the db
 	err = tx.Model(&p).Where("id = ?", old.ID).Updates(p).Error
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
@@ -281,13 +281,13 @@ func (u UseCaseHandler) DeleteByID(id string, p *ParamDelete) error {
 	// prepare db for current ctx
 	tx, err := u.Ctx.DB()
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// update data on the db
 	err = tx.Model(&p).Where("id = ?", old.ID).Update("deleted_at", time.Now().UTC()).Error
 	if err != nil {
-		return app.NewError(http.StatusInternalServerError, err.Error())
+		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache

@@ -4,7 +4,6 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,21 +11,12 @@ import (
 	"grest.dev/grest"
 )
 
-func Server() ServerInterface {
+func Server() *serverUtil {
 	if server == nil {
 		server = &serverUtil{}
 		server.configure()
 	}
 	return server
-}
-
-type ServerInterface interface {
-	AddRoute(path, method string, handler fiber.Handler, operation OpenAPIOperationInterface)
-	AddStaticRoute(path string, fsConfig filesystem.Config)
-	AddOpenAPIDoc(path string, f embed.FS)
-	AddMiddleware(handler fiber.Handler)
-	Start() error
-	Test(req *http.Request, msTimeout ...int) (resp *http.Response, err error)
 }
 
 var server *serverUtil
@@ -43,11 +33,11 @@ type serverUtil struct {
 func (s *serverUtil) configure() {
 	s.Addr = ":" + APP_PORT
 	s.Fiber = fiber.New(fiber.Config{
-		ErrorHandler:          ErrorHandler,
+		ErrorHandler:          Error().Handler,
 		ReadBufferSize:        16384,
 		DisableStartupMessage: true,
 	})
-	s.AddMiddleware(Recover)
+	s.AddMiddleware(Error().Recover)
 }
 
 // use grest to add route so it can generate swagger api documentation automatically
@@ -82,8 +72,17 @@ func (s *serverUtil) AddMiddleware(handler fiber.Handler) {
 	s.Fiber.Use(handler)
 }
 
+func (s *serverUtil) NotFoundHandler(c *fiber.Ctx) error {
+	lang := c.Get("Accept-Language")
+	if lang == "" || lang == "*" || strings.Contains(lang, ",") || strings.Contains(lang, ";") {
+		lang = "en"
+	}
+	err := Error().New(http.StatusNotFound, Translator().Trans(lang, "404_not_found"))
+	return c.Status(Error().StatusCode(err)).JSON(Error().Detail(err))
+}
+
 func (s *serverUtil) Start() error {
-	s.Fiber.Use(NotFoundHandler)
+	s.Fiber.Use(s.NotFoundHandler)
 	if !s.DisableStartupMessage {
 		grest.StartupMessage(s.Addr)
 	}
@@ -95,28 +94,6 @@ func (s *serverUtil) Start() error {
 
 func (s *serverUtil) Test(req *http.Request, msTimeout ...int) (*http.Response, error) {
 	return s.Fiber.Test(req, msTimeout...)
-}
-
-func ParseQuery(c *fiber.Ctx) url.Values {
-	query := url.Values{}
-	_, qs, _ := strings.Cut(c.OriginalURL(), "?")
-	for qs != "" {
-		q := ""
-		q, qs, _ = strings.Cut(qs, "&")
-		if q == "" || strings.Contains(q, ";") {
-			continue
-		}
-
-		key, value, _ := strings.Cut(q, "=")
-		if k, err := url.QueryUnescape(key); err == nil {
-			key = k
-		}
-		if v, err := url.QueryUnescape(value); err == nil {
-			value = v
-		}
-		query.Add(key, value)
-	}
-	return query
 }
 
 func VersionHandler(c *fiber.Ctx) error {

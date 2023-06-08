@@ -10,7 +10,10 @@ import (
 	"grest.dev/grest"
 )
 
-func DB() DBInterface {
+// DB returns a pointer to the dbUtil instance (db).
+// If db is not initialized, it creates a new dbUtil instance, configures it, and assigns it to db.
+// It ensures that only one instance of dbUtil is created and reused.
+func DB() *dbUtil {
 	if db == nil {
 		db = &dbUtil{}
 		db.configure()
@@ -18,24 +21,19 @@ func DB() DBInterface {
 	return db
 }
 
-type DBInterface interface {
-	RegisterConn(connName string, conn *gorm.DB)
-	Conn(connName string) (*gorm.DB, error)
-	Close()
-	RegisterTable(connName string, t grest.Table) error
-	MigrateTable(tx *gorm.DB, connName string, mTable grest.MigrationTable) error
-	RegisterSeeder(connName, seederKey string, seederHandler grest.SeederHandler) error
-	RunSeeder(tx *gorm.DB, connName string, seedTable grest.SeederTable) error
-	Connect(connName string, c grest.DBConfig) error
-	IsNotFoundError(err error) bool
-}
-
+// db is a pointer to a dbUtil instance.
+// It is used to store and access the singleton instance of dbUtil.
 var db *dbUtil
 
+// dbUtil represents a db utility.
+// It embeds grest.DB, indicating that dbUtil inherits from grest.DB.
 type dbUtil struct {
 	grest.DB
 }
 
+// configure configures the db utility instance.
+// It connect to main db corresponding environment variables.
+// You can configure here to connect to multiple db based on connection name if needed.
 func (d *dbUtil) configure() *dbUtil {
 	c := grest.DBConfig{}
 	c.Driver = DB_DRIVER
@@ -59,6 +57,7 @@ func (d *dbUtil) configure() *dbUtil {
 	return d
 }
 
+// Connect connect to the db and store to config based on connName key.
 func (d *dbUtil) Connect(connName string, c grest.DBConfig) error {
 	dialector := postgres.Open(c.DSN())
 	gormDB, err := gorm.Open(dialector, &gorm.Config{})
@@ -83,7 +82,7 @@ func (d *dbUtil) Connect(connName string, c grest.DBConfig) error {
 	return nil
 }
 
-// Automatic read and write connection switching
+// setupReplicas setup replica to automatic read and write connection switching.
 func (d *dbUtil) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 	if DB_HOST_READ != "" {
 		dialector := postgres.Open(c.DSN())
@@ -106,6 +105,7 @@ func (d *dbUtil) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 	}
 }
 
+// IsNotFoundError check if an error is not found error.
 func (*dbUtil) IsNotFoundError(err error) bool {
 	return errors.Is(err, gorm.ErrRecordNotFound)
 }

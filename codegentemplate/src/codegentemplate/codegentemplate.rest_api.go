@@ -23,21 +23,21 @@ type RESTAPIHandler struct {
 func (r *RESTAPIHandler) injectDeps(c *fiber.Ctx) error {
 	ctx, ok := c.Locals(app.CtxKey).(*app.Ctx)
 	if !ok {
-		return app.NewError(http.StatusInternalServerError, "ctx is not found")
+		return app.Error().New(http.StatusInternalServerError, "ctx is not found")
 	}
-	r.UseCase = UseCase(*ctx, app.ParseQuery(c))
+	r.UseCase = UseCase(*ctx, app.Query().Parse(c.OriginalURL()))
 	return nil
 }
 
-// GetByID is the REST API handler for `GET /api/v3/end_point/{id}`.
+// GetByID is the REST API handler for `GET /api/end_point/{id}`.
 func (r *RESTAPIHandler) GetByID(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	res, err := r.UseCase.GetByID(c.Params("id"))
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.IsFlat() {
 		return c.JSON(res)
@@ -45,15 +45,15 @@ func (r *RESTAPIHandler) GetByID(c *fiber.Ctx) error {
 	return c.JSON(grest.NewJSON(res).ToStructured().Data)
 }
 
-// Get is the REST API handler for `GET /api/v3/end_point`.
+// Get is the REST API handler for `GET /api/end_point`.
 func (r *RESTAPIHandler) Get(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	res, err := r.UseCase.Get()
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	res.SetLink(c)
 	if r.UseCase.IsFlat() {
@@ -62,27 +62,27 @@ func (r *RESTAPIHandler) Get(c *fiber.Ctx) error {
 	return c.JSON(grest.NewJSON(res).ToStructured().Data)
 }
 
-// Create is the REST API handler for `POST /api/v3/end_point`.
+// Create is the REST API handler for `POST /api/end_point`.
 func (r *RESTAPIHandler) Create(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	p := ParamCreate{}
 	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
 	if err != nil {
-		return app.ErrorHandler(c, app.NewError(http.StatusBadRequest, err.Error()))
+		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
 	err = r.UseCase.Create(&p)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.Query.Get("is_skip_return") == "true" {
 		return c.Status(http.StatusCreated).JSON(map[string]any{"message": "Success"})
 	}
 	res, err := r.UseCase.GetByID(p.ID.String)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.IsFlat() {
 		return c.Status(http.StatusCreated).JSON(res)
@@ -90,27 +90,27 @@ func (r *RESTAPIHandler) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(grest.NewJSON(res).ToStructured().Data)
 }
 
-// UpdateByID is the REST API handler for `PUT /api/v3/end_point/{id}`.
+// UpdateByID is the REST API handler for `PUT /api/end_point/{id}`.
 func (r *RESTAPIHandler) UpdateByID(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	p := ParamUpdate{}
 	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
 	if err != nil {
-		return app.ErrorHandler(c, app.NewError(http.StatusBadRequest, err.Error()))
+		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
 	err = r.UseCase.UpdateByID(c.Params("id"), &p)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.Query.Get("is_skip_return") == "true" {
 		return c.JSON(map[string]any{"message": "Success"})
 	}
 	res, err := r.UseCase.GetByID(c.Params("id"))
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.IsFlat() {
 		return c.JSON(res)
@@ -118,27 +118,27 @@ func (r *RESTAPIHandler) UpdateByID(c *fiber.Ctx) error {
 	return c.JSON(grest.NewJSON(res).ToStructured().Data)
 }
 
-// PartiallyUpdateByID is the REST API handler for `PATCH /api/v3/end_point/{id}`.
+// PartiallyUpdateByID is the REST API handler for `PATCH /api/end_point/{id}`.
 func (r *RESTAPIHandler) PartiallyUpdateByID(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	p := ParamPartiallyUpdate{}
 	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
 	if err != nil {
-		return app.ErrorHandler(c, app.NewError(http.StatusBadRequest, err.Error()))
+		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
 	err = r.UseCase.PartiallyUpdateByID(c.Params("id"), &p)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.Query.Get("is_skip_return") == "true" {
 		return c.JSON(map[string]any{"message": "Success"})
 	}
 	res, err := r.UseCase.GetByID(c.Params("id"))
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	if r.UseCase.IsFlat() {
 		return c.JSON(res)
@@ -146,20 +146,20 @@ func (r *RESTAPIHandler) PartiallyUpdateByID(c *fiber.Ctx) error {
 	return c.JSON(grest.NewJSON(res).ToStructured().Data)
 }
 
-// DeleteByID is the REST API handler for `DELETE /api/v3/end_point/{id}`.
+// DeleteByID is the REST API handler for `DELETE /api/end_point/{id}`.
 func (r *RESTAPIHandler) DeleteByID(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	p := ParamDelete{}
 	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
 	if err != nil {
-		return app.ErrorHandler(c, app.NewError(http.StatusBadRequest, err.Error()))
+		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
 	err = r.UseCase.DeleteByID(c.Params("id"), &p)
 	if err != nil {
-		return app.ErrorHandler(c, err)
+		return app.Error().Handler(c, err)
 	}
 	res := map[string]any{
 		"code": http.StatusOK,

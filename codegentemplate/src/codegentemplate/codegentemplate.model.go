@@ -68,6 +68,25 @@ func (CodeGenTemplate) OpenAPISchemaName() string {
 	return "CodeGenTemplate"
 }
 
+// GetOpenAPISchema returns the Open API Schema of the CodeGenTemplate in the open api documentation.
+func (m *CodeGenTemplate) GetOpenAPISchema() map[string]any {
+	return m.SetOpenAPISchema(m)
+}
+
+type CodeGenTemplateList struct {
+	app.ListModel
+}
+
+// OpenAPISchemaName returns the name of the CodeGenTemplateList schema in the open api documentation.
+func (CodeGenTemplateList) OpenAPISchemaName() string {
+	return "CodeGenTemplateList"
+}
+
+// GetOpenAPISchema returns the Open API Schema of the CodeGenTemplateList in the open api documentation.
+func (p *CodeGenTemplateList) GetOpenAPISchema() map[string]any {
+	return p.SetOpenAPISchema(&CodeGenTemplate{})
+}
+
 // ParamCreate is the expected parameters for create a new CodeGenTemplate data.
 type ParamCreate struct {
 	UseCaseHandler

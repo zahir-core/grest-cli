@@ -1,34 +1,19 @@
 package app
 
-import (
-	"net/http"
-	"time"
+import "grest.dev/grest"
 
-	"grest.dev/grest"
-)
-
-func HttpClient(method, url string) HttpClientInterface {
+// HttpClient creates and returns a new instance of httpClientUtil.
+// It takes two parameters: method (HTTP method) and url (URL).
+// The function initializes the Method and Url fields of the httpClientUtil instance and returns it.
+func HttpClient(method, url string) *httpClientUtil {
 	hc := &httpClientUtil{}
 	hc.Method = method
 	hc.Url = url
 	return hc
 }
 
-type HttpClientInterface interface {
-	Debug()
-	AddHeader(key, value string)
-	AddMultipartBody(body any) error
-	AddUrlEncodedBody(body any) error
-	AddJsonBody(body any) error
-	AddXmlBody(body any) error
-	SetTimeout(timeout time.Duration)
-	Send() (*http.Response, error)
-	BodyResponseStr() string
-	UnmarshalJson(v any) error
-	UnmarshalXml(v any) error
-}
-
-// httpClientUtil implement HttpClientInterface embed from grest.httpClientUtil for simplicity
+// httpClientUtil represents a utility for making HTTP requests.
+// It embeds the grest.HttpClient type, which provides additional functionality for making HTTP requests.
 type httpClientUtil struct {
 	grest.HttpClient
 }

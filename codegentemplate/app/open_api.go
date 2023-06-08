@@ -21,7 +21,122 @@ func (o *openAPIUtil) Configure() *openAPIUtil {
 		{"description": "Local", "url": "http://localhost:4001"},
 	}
 	o.Info.Title = "My App API"
-	o.Info.Description = ""
+	o.Info.Description = "The My App API allows you to perform all the operations that you do with our applications. " +
+		"My App API is built using REST principles which ensures predictable URLs, uses standard HTTP response codes, " +
+		`authentication, and verbs that makes writing applications easy.
+
+## Query Params
+
+My App API support a common way for pagination, sorting, filtering, searching and other using URL query params on ` + "`GET`" + ` method.
+
+### Pagination
+
+You can use the following query parameters for pagination :
+
+* ` + "`" + `$page` + "`" + `: used to specify the page number to retrieve, default = 1.
+* ` + "`" + `$per_page` + "`" + `: used to specify the number of items to retrieve per page, default = 10.
+* ` + "`" + `$is_disable_pagination` + "`" + `: used to disable pagination and retrieve all items in one request, default = false.
+Example :
+` + "`" + `` + "`" + `` + "`" + `
+GET /contacts?$page=3&$per_page=10
+` + "`" + `` + "`" + `` + "`" + `
+
+### Sorting
+
+You can use the ` + "`" + `$sort` + "`" + ` query parameter for sorting.
+
+* Use the field name according to what you want to sort.
+* Use dot notation to sort by the field of the object.
+* You can specify multiple fields separated by commas.
+* Add ` + "`" + `-` + "`" + ` (minus sign) before the field name to sort in descending order.
+* Add ` + "`" + `:i` + "`" + ` after the field name to sort case-insensitively.
+
+This is example if you want to retrieve product data sort by category name, then quantity on hand descending, then case-insensitive name descending :
+` + "`" + `` + "`" + `` + "`" + `
+GET /products?$sort=category.name,-quantity.on_hand,-name:i
+` + "`" + `` + "`" + `` + "`" + `
+
+### Filtering
+
+You can use the field name for filtering the result set based on one or more conditions.
+
+* Use the field name according to what you want to filter.
+* Use dot notation to filter by the field of the object.
+* Use dot notation with ` + "`" + `*` + "`" + ` to filter by the field on array of the object. (TODO)
+* Use dot notation with ` + "`" + `0` + "`" + ` to filter by the field on array of the object and also hide non-matching arrays in the results. (TODO)
+* You can use the following operators for filtering :
+
+Operator  | Description               | Example
+----------|---------------------------|-----------------------------
+none      | Equal to (Exact matches)  | ` + "`" + `/contacts?gender=male` + "`" + `
+` + "`" + `$eq` + "`" + `     | Same as above             | ` + "`" + `/contacts?gender.$eq=male` + "`" + `
+` + "`" + `$ne` + "`" + `     | Not equal to              | ` + "`" + `/contacts?phone.$ne=null` + "`" + `
+` + "`" + `$gt` + "`" + `     | Greater than              | ` + "`" + `/contacts?age.$gt=18` + "`" + `
+` + "`" + `$gte` + "`" + `    | Greater than or equal     | ` + "`" + `/contacts?age.$gte=21` + "`" + `
+` + "`" + `$lt` + "`" + `     | Less than                 | ` + "`" + `/contacts?age.$lt=17` + "`" + `
+` + "`" + `$lte` + "`" + `    | Less than or equal        | ` + "`" + `/contacts?age.$lte=15` + "`" + `
+` + "`" + `$like` + "`" + `   | Like                      | ` + "`" + `/contacts?name.$like=john%` + "`" + `
+` + "`" + `$nlike` + "`" + `  | Not like                  | ` + "`" + `/contacts?name.$nlike=john%` + "`" + `
+` + "`" + `$ilike` + "`" + `  | Case-insensitive Like     | ` + "`" + `/contacts?name.$ilike=john%` + "`" + `
+` + "`" + `$nilike` + "`" + ` | Case-insensitive Not Like | ` + "`" + `/contacts?name.$nilike=john%` + "`" + `
+` + "`" + `$in` + "`" + `     | In                        | ` + "`" + `/contacts?age.$in=17,21,34` + "`" + `
+` + "`" + `$nin` + "`" + `    | Not in                    | ` + "`" + `/contacts?age.$nin=17,21,34` + "`" + `
+
+### Conditional filtering
+
+You can use the ` + "`" + `$or` + "`" + ` query parameter with ` + "`" + `|` + "`" + ` delimiter for conditional filtering.
+
+This is example if you want to filter contact data with condition ` + "`" + `(gender = 'female' or age < 10) and (is_salesman = '1' or is_employee = '1')` + "`" + ` :
+` + "`" + `` + "`" + `` + "`" + `
+GET /contacts?$or=gender:female|age.$lt:10&$or=is_salesman:true|is_employee:true
+` + "`" + `` + "`" + `` + "`" + `
+
+### Searching
+
+You can use the ` + "`" + `$search` + "`" + ` query parameter for searching.
+
+This is example if you want to search contact data with code or name contain character "john" (case-insensitive) :
+` + "`" + `` + "`" + `` + "`" + `
+GET /contacts?$search=code,name:john
+` + "`" + `` + "`" + `` + "`" + `
+
+### Comparing
+
+You can use the ` + "`" + `$field` + "`" + ` key for comparing one field to another field in the same record.
+
+This is example if you want to filter product data with qty_on_order greater than qty_available :
+` + "`" + `` + "`" + `` + "`" + `
+GET /products?qty_on_order.$gt=$field:qty_available
+` + "`" + `` + "`" + `` + "`" + `
+
+### Selection
+
+You can use the ` + "`" + `$select` + "`" + ` query parameter to retrieve specific fields in the response.
+
+* Use the field name according to what you want to retrieve.
+* Use dot notation to retrieve the field of the object.
+* You can specify multiple fields separated by commas, for example : ` + "`" + `GET /contacts?$select=id,code,name,classification.name` + "`" + `.
+* By default, array fields are hidden on get list api for performance reason, you can use ` + "`" + `$nclude` + "`" + ` query parameter to retrieve the specific array field, for example : ` + "`" + `/contacts?$include=families,friends,phones` + "`" + `. Example to retrieve all array field : ` + "`" + `/contacts?$include=all` + "`" + `
+* You can use the following operator for aggregation :
+
+Operator | Description | Example                    
+---------|-------------|----------------------------
+` + "`" + `$count` + "`" + ` | count       | ` + "`" + `/products?$select=$count:id` + "`" + `
+` + "`" + `$sum` + "`" + `   | sum         | ` + "`" + `/products?$select=$sum:sold` + "`" + `
+` + "`" + `$min` + "`" + `   | minimum     | ` + "`" + `/products?$select=$min:sold` + "`" + `
+` + "`" + `$max` + "`" + `   | maximum     | ` + "`" + `/products?$select=$max:sold` + "`" + `
+` + "`" + `$avg` + "`" + `   | average     | ` + "`" + `/products?$select=$avg:sold` + "`" + `
+
+### Grouping
+
+You can use the ` + "`" + `$group` + "`" + ` query parameter to grouping.
+
+Example :
+` + "`" + `` + "`" + `` + "`" + `
+/products?$group=category.id&$select=category.id,$sum:sold&$sort:-$sum:sold
+` + "`" + `` + "`" + `` + "`" + `
+`
+
 	o.Info.Version = APP_VERSION
 	if o.Components == nil {
 		o.Components = map[string]any{}

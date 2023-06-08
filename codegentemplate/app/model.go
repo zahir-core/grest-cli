@@ -38,10 +38,10 @@ func (list *ListModel) SetData(data []map[string]any, query url.Values) {
 }
 
 func (list *ListModel) SetLink(c *fiber.Ctx) {
-	q := ParseQuery(c)
+	q := Query().Parse(c.OriginalURL())
 	q.Set(grest.QueryLimit, strconv.Itoa(int(list.PageContext.PerPage)))
 
-	path := strings.Split(c.OriginalURL(), "?")[0] + "?"
+	path, _, _ := strings.Cut(c.OriginalURL(), "?")
 
 	first := q
 	first.Del(grest.QueryPage)
@@ -67,6 +67,29 @@ func (list *ListModel) SetLink(c *fiber.Ctx) {
 	last.Set(grest.QueryPage, strconv.Itoa(int(list.PageContext.PageCount)))
 	lastQS, _ := url.QueryUnescape(last.Encode())
 	list.Links.Last = c.BaseURL() + path + lastQS
+}
+func (list *ListModel) SetOpenAPISchema(m ModelInterface) map[string]any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"count": map[string]any{"type": "integer"},
+			"page_context": map[string]any{"type": "object", "properties": map[string]any{
+				"page":        map[string]any{"type": "integer"},
+				"per_page":    map[string]any{"type": "integer"},
+				"total_pages": map[string]any{"type": "integer"},
+			}},
+			"links": map[string]any{"type": "object", "properties": map[string]any{
+				"first":    map[string]any{"type": "string"},
+				"previous": map[string]any{"type": "string"},
+				"next":     map[string]any{"type": "string"},
+				"last":     map[string]any{"type": "string"},
+			}},
+			"results": map[string]any{
+				"type":  "array",
+				"items": m.GetOpenAPISchema(),
+			},
+		},
+	}
 }
 
 type Setting struct {

@@ -1,2 +1,2 @@
-// app merupakan class atau fungsi atau variabel umum yang dipakai pada sebagian besar API.
+// app is a package to accommodate classes or common variables that are used in almost all end points.
 package app

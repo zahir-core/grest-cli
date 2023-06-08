@@ -29,12 +29,12 @@ func main() {
 	defer app.DB().Close()
 	app.Server()
 
+	src.Middleware()
+	src.Router()
 	if app.APP_ENV != "production" {
 		app.Server().AddOpenAPIDoc("/api/docs", f)
 	}
 
-	src.Middleware()
-	src.Router()
 	src.Migrator()
 	src.Seeder()
 	src.Scheduler()

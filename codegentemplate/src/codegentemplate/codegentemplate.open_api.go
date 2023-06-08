@@ -38,10 +38,6 @@ func (o *OpenAPIOperation) Get() *OpenAPIOperation {
 	o.Summary = "Get CodeGenTemplate"
 	o.Description = "Use this method to get list of CodeGenTemplate"
 	o.QueryParams = []map[string]any{{"$ref": "#/components/parameters/queryParam.Any"}}
-	type CodeGenTemplateList struct {
-		app.ListModel
-		Data []CodeGenTemplate `json:"results"`
-	}
 	o.Responses = map[string]map[string]any{
 		"200": {
 			"description": "Success",

@@ -8,7 +8,10 @@ import (
 	"grest.dev/grest"
 )
 
-func Cache() CacheInterface {
+// Cache returns a pointer to the cacheUtil instance (cache).
+// If cache is not initialized, it creates a new cacheUtil instance, configures it, and assigns it to cache.
+// It ensures that only one instance of cacheUtil is created and reused.
+func Cache() *cacheUtil {
 	if cache == nil {
 		cache = &cacheUtil{}
 		cache.configure()
@@ -16,22 +19,22 @@ func Cache() CacheInterface {
 	return cache
 }
 
-type CacheInterface interface {
-	Get(key string, val any) error
-	Set(key string, val any, e ...time.Duration) error
-	Delete(key string) error
-	DeleteWithPrefix(prefix string) error
-	Invalidate(prefix string, keys ...string)
-	Clear() error
-}
-
+// cache is a pointer to a cacheUtil instance.
+// It is used to store and access the singleton instance of cacheUtil.
 var cache *cacheUtil
 
-// cacheUtil implement CacheInterface embed from grest.Cache for simplicity
+// cacheUtil represents a cache utility.
+// It embeds grest.Cache, indicating that cacheUtil inherits from grest.Cache.
 type cacheUtil struct {
 	grest.Cache
 }
 
+// configure configures the cache utility instance.
+// It sets the expiration time (c.Exp) to 24 hours and initializes the Redis client (c.RedisClient) with the provided Redis options.
+// It sets the context (c.Ctx) to the background context.
+// It pings the Redis server to check the connection status and stores the result in the err variable.
+// If there is an error connecting to Redis, it logs the error and the Redis connection details.
+// Otherwise, it sets c.IsUseRedis to true and logs a successful cache configuration with Redis.
 func (c *cacheUtil) configure() {
 	c.Exp = 24 * time.Hour
 	c.RedisClient = redis.NewClient(&redis.Options{

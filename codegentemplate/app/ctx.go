@@ -13,8 +13,8 @@ import (
 const CtxKey = "ctx"
 
 type Ctx struct {
-	Lang   string // bahasa yang digunakan oleh user ybs
-	Action Action // informasi umum terkait request
+	Lang   string // language code
+	Action Action // general request info
 
 	IsAsync bool     // for async use, autocommit
 	mainTx  *gorm.DB // for normal use, commit & rollback from middleware
@@ -26,7 +26,8 @@ type Action struct {
 	DataID   string
 }
 
-// Begin db transaction, dipanggil dari middleware sebelum masuk ke handler.
+// TxBegin begins a new transaction using the main database connection.
+// It returns an error if there is an issue establishing the connection.
 func (c *Ctx) TxBegin() error {
 	mainTx, err := DB().Conn("main")
 	if err != nil {
@@ -36,7 +37,9 @@ func (c *Ctx) TxBegin() error {
 	return nil
 }
 
-// Commit db transaction, dipanggil dari middleware setelah dari handler ketika response nya berhasil (2xx).
+// TxCommit commits the current transaction if it exists (mainTx is not nil).
+// Called in middleware when there is no error (http status code is 2xx).
+// It does nothing if there is no active transaction.
 func (c *Ctx) TxCommit() {
 	if c.mainTx != nil {
 		c.mainTx.Commit()
@@ -46,7 +49,9 @@ func (c *Ctx) TxCommit() {
 	c.mainTx = nil
 }
 
-// Rollback db transaction, dipanggil dari middleware setelah dari handler ketika response nya error (selain 2xx).
+// TxRollback rolls back the current transaction if it exists (mainTx is not nil).
+// Called on middleware when there is an error (http status code not 2xx)
+// It does nothing if there is no active transaction.
 func (c *Ctx) TxRollback() {
 	if c.mainTx != nil {
 		c.mainTx.Rollback()
@@ -55,22 +60,29 @@ func (c *Ctx) TxRollback() {
 	c.mainTx = nil
 }
 
-// Trans memberikan translasi atas key dan params sesuai dengan bahasa yang sedang digunakan user.
+// Trans translates a given key using the language specified in the context (c.Lang).
+// It supports optional parameters for dynamic translation.
 func (c Ctx) Trans(key string, params ...map[string]string) string {
 	return Translator().Trans(c.Lang, key, params...)
 }
 
-// ValidateAuth melakukan validasi apakah permintaan dilakukan oleh user yang berwenang atau tidak.
+// ValidatePermission validates permission for a given ACL key.
+// It returns an error if the permission is not granted.
 func (c Ctx) ValidatePermission(aclKey string) error {
 	// todo
 	return nil
 }
 
-// ValidateParam melakukan validasi atas payload yang dikirim.
+// This method validates the parameters based on struct tag.
+// It returns an error using the language specified in the context (c.Lang) if the validation fails.
 func (c Ctx) ValidateParam(v any) error {
 	return Validator().ValidateStruct(v, c.Lang)
 }
 
+// This method returns the GORM database connection based on the provided connection name (connName).
+// If IS_USE_MOCK_DB is true, it returns the mock database connection.
+// If c.IsAsync is false and there is an active transaction (c.mainTx), it returns the transaction connection.
+// Otherwise, it returns the main database connection.
 func (c Ctx) DB(connName ...string) (*gorm.DB, error) {
 	if IS_USE_MOCK_DB {
 		return Mock().DB()
@@ -83,9 +95,13 @@ func (c Ctx) DB(connName ...string) (*gorm.DB, error) {
 	return DB().Conn("main")
 }
 
+// This method checks if the given error is a "record not found" error from GORM.
+// If it is, it creates a new HTTP error with a "not found" status and a translated error message.
+// The translated message includes the entity, key, and value involved in the error.
+// It returns the created error or nil if the given error is not a "not found" error.
 func (c Ctx) NotFoundError(err error, entity, key, value string) error {
 	if err != nil && err == gorm.ErrRecordNotFound {
-		return NewError(http.StatusNotFound, c.Trans("not_found",
+		return Error().New(http.StatusNotFound, c.Trans("not_found",
 			map[string]string{
 				"entity": c.Trans(entity),
 				"key":    c.Trans(key),
@@ -96,6 +112,10 @@ func (c Ctx) NotFoundError(err error, entity, key, value string) error {
 	return nil
 }
 
+// This method performs a hook operation, which involves sleeping for 2 seconds and performing some data manipulation based on the provided parameters.
+// It checks if the old value implements the IsFlat() method and determines whether the data is flat.
+// If the data is not flat, it converts the old value to a structured format.
+// You can do anything you want with this method, for example to save user activity log, send callback/webhook, etc.
 func (c Ctx) Hook(method, reason, id string, old any) {
 
 	// kasih jeda 2 detik untuk memastikan db transaction nya sudah di commit
