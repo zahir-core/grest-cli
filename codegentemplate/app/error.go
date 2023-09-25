@@ -1,7 +1,10 @@
 package app
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/gofiber/fiber/v2"
 	"grest.dev/grest"
@@ -85,6 +88,27 @@ func (errorUtil) TraceSimple(err error) map[string]string {
 	return nil
 }
 
+func (eu errorUtil) GetOriginalMessage(err error) string {
+	msg := err.Error()
+	errDetail := eu.Detail(err)
+	if mapErr, ok := errDetail.(map[string]any); ok {
+		if mapError, ok := mapErr["error"].(map[string]any); ok {
+			if mapDetail, ok := mapError["detail"]; ok {
+				if mpDetail, ok := mapDetail.(map[string]string); ok {
+					if errMsg, ok := mpDetail["message"]; ok {
+						msg = errMsg
+					}
+				} else if mpDetail, ok := mapDetail.(map[string]any); ok {
+					if errMsg, ok := mpDetail["message"].(string); ok {
+						msg = errMsg
+					}
+				}
+			}
+		}
+	}
+	return msg
+}
+
 // Handler handles errors by processing them and returning an appropriate response.
 // It retrieves the language from the context (c) and assigns it to lang.
 // It checks if the error is an instance of grest.Error.
@@ -126,7 +150,19 @@ func (errorUtil) Handler(c *fiber.Ctx, err error) error {
 func (errorUtil) Recover(c *fiber.Ctx) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			// todo: save log & send alert to telegram
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("%v", r)
+			}
+			ctx := &Ctx{}
+			if c != nil {
+				ctx, _ = c.Locals(CtxKey).(*Ctx)
+			}
+			attrs := Logger().Attrs(*ctx)
+			attrs = append(attrs, slog.Any("panic", r))
+			attrs = append(attrs, slog.Any("stack", string(debug.Stack())))
+			Logger().Error(err.Error(), attrs...)
 		}
 	}()
 	return c.Next()

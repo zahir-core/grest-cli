@@ -13,17 +13,18 @@ import (
 const CtxKey = "ctx"
 
 type Ctx struct {
-	Lang   string // language code
-	Action Action // general request info
+	Lang    string  // language code
+	Request Request // general request info
+	Err     error
 
 	IsAsync bool     // for async use, autocommit
 	mainTx  *gorm.DB // for normal use, commit & rollback from middleware
 }
 
-type Action struct {
-	Method   string
-	EndPoint string
-	DataID   string
+type Request struct {
+	Method  string
+	Path    string
+	Referer string
 }
 
 // TxBegin begins a new transaction using the main database connection.

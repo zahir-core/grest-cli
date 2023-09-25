@@ -61,7 +61,7 @@ func (s *serverUtil) AddStaticRoute(path string, fsConfig filesystem.Config) {
 func (s *serverUtil) AddOpenAPIDoc(path string, f embed.FS) {
 	docs, err := fs.Sub(f, "docs")
 	if err != nil {
-		Logger().Fatal().Err(err).Send()
+		Logger().Fatal(err.Error(), err)
 	}
 	s.AddStaticRoute(path, filesystem.Config{
 		Root: http.FS(docs),

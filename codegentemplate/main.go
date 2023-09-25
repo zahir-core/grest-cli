@@ -40,6 +40,6 @@ func main() {
 	src.Scheduler()
 	err := app.Server().Start()
 	if err != nil {
-		app.Logger().Fatal().Err(err).Send()
+		app.Logger().Fatal(err.Error(), err)
 	}
 }

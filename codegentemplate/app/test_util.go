@@ -69,9 +69,10 @@ func (t *testUtil) NewCtx(aclKeys []string) fiber.Handler {
 		ctx := Ctx{
 			mainTx: t.Tx,
 			Lang:   "en",
-			Action: Action{
-				Method:   c.Method(),
-				EndPoint: c.Path(),
+			Request: Request{
+				Method:  c.Method(),
+				Path:    c.Path(),
+				Referer: c.Get("Referer"),
 			},
 		}
 

@@ -2,6 +2,9 @@ package app
 
 import "grest.dev/grest"
 
+// OpenAPI returns a pointer to the openAPIUtil instance (openAPI).
+// If openAPI is not initialized, it creates a new openAPIUtil instance, configures it, and assigns it to openAPI.
+// It ensures that only one instance of openAPIUtil is created and reused.
 func OpenAPI() *openAPIUtil {
 	if openAPI == nil {
 		openAPI = &openAPIUtil{}
@@ -9,13 +12,21 @@ func OpenAPI() *openAPIUtil {
 	return openAPI
 }
 
+// openAPI is a pointer to a openAPIUtil instance.
+// It is used to store and access the singleton instance of openAPIUtil.
 var openAPI *openAPIUtil
 
+// openAPIUtil represents a openAPI utility.
+// It embeds grest.OpenAPI, indicating that openAPIUtil inherits from grest.OpenAPI.
 type openAPIUtil struct {
 	grest.OpenAPI
 }
 
+// Configure configures the openAPI utility instance.
 func (o *openAPIUtil) Configure() *openAPIUtil {
+	if !IS_GENERATE_OPEN_API_DOC {
+		return o // skip for efficiency
+	}
 	o.SetVersion()
 	o.Servers = []map[string]any{
 		{"description": "Local", "url": "http://localhost:4001"},

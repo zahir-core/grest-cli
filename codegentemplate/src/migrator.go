@@ -30,11 +30,11 @@ func (*migratorUtil) Configure() {
 func (*migratorUtil) Run() {
 	tx, err := app.DB().Conn("main")
 	if err != nil {
-		app.Logger().Fatal().Err(err).Send()
+		app.Logger().Fatal(err.Error(), err)
 	} else {
 		err = app.DB().MigrateTable(tx, "main", app.Setting{})
 	}
 	if err != nil {
-		app.Logger().Fatal().Err(err).Send()
+		app.Logger().Fatal(err.Error(), err)
 	}
 }
