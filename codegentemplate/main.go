@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"log/slog"
 	"os"
 
 	"grest.dev/cmd/codegentemplate/app"
@@ -32,7 +33,7 @@ func main() {
 	src.Middleware()
 	src.Router()
 	if app.APP_ENV != "production" {
-		app.Server().AddOpenAPIDoc("/api/docs", f)
+		app.Server().AddStaticFSRoute("/api/docs", "docs", f)
 	}
 
 	src.Migrator()
@@ -40,6 +41,6 @@ func main() {
 	src.Scheduler()
 	err := app.Server().Start()
 	if err != nil {
-		app.Logger().Fatal().Err(err).Send()
+		app.Logger().Fatal("Failed to start web server", slog.Any("err", err))
 	}
 }

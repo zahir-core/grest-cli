@@ -37,13 +37,22 @@ var (
 	IS_USE_MOCK_SERVICE = false
 	IS_USE_MOCK_DB      = false
 
-	LOG_CONSOLE_ENABLED     = true           // print log to the terminal
-	LOG_FILE_ENABLED        = false          // log to a file. the fields below can be skipped if this value is false
-	LOG_FILE_USE_LOCAL_TIME = true           // if false log rotation filename will be use UTC time
-	LOG_FILE_FILENAME       = "logs/api.log" //
-	LOG_FILE_MAX_SIZE       = 100            // MB
-	LOG_FILE_MAX_AGE        = 7              // days
-	LOG_FILE_MAX_BACKUPS    = 0              // files
+	LOG_LEVEL                 = "info"                             // debug, info, warning, error
+	LOG_CONSOLE_ENABLED       = true                               // print log to the terminal
+	LOG_CONSOLE_WITH_JSON     = false                              // log console with json format
+	LOG_CONSOLE_TIME_FORMAT   = "[2006-01-02 15:04:05.000 Z07:00]" // log console time format
+	LOG_CONSOLE_EXCLUDED_KEYS = ""                                 // log console excluded keys
+	LOG_FILE_ENABLED          = true                               // log to a file. the fields below can be skipped if this value is false
+	LOG_FILE_WITH_JSON        = true                               // log file with json format
+	LOG_FILE_USE_LOCAL_TIME   = true                               // if false log rotation filename will be use UTC time
+	LOG_FILE_FILENAME         = "logs/api.log"                     // log file filename
+	LOG_FILE_MAX_SIZE         = 100                                // MB
+	LOG_FILE_MAX_AGE          = 7                                  // days
+	LOG_FILE_MAX_BACKUPS      = 0                                  // files
+	LOG_WITH_DURATION         = true
+	LOG_WITH_REQUEST_HEADER   = true
+	LOG_WITH_REQUEST_BODY     = true
+	LOG_WITH_RESPONSE_BODY    = true
 
 	JWT_KEY     = "f4cac8b77a8d4cb5881fac72388bb226"
 	CRYPTO_KEY  = "wAGyTpFQX5uKV3JInABXXEdpgFkQLPTf"
@@ -115,13 +124,22 @@ func (*configUtil) configure() {
 	grest.LoadEnv("IS_USE_MOCK_SERVICE", &IS_USE_MOCK_SERVICE)
 	grest.LoadEnv("IS_USE_MOCK_DB", &IS_USE_MOCK_DB)
 
+	grest.LoadEnv("LOG_LEVEL", &LOG_LEVEL)
 	grest.LoadEnv("LOG_CONSOLE_ENABLED", &LOG_CONSOLE_ENABLED)
+	grest.LoadEnv("LOG_CONSOLE_WITH_JSON", &LOG_CONSOLE_WITH_JSON)
+	grest.LoadEnv("LOG_CONSOLE_TIME_FORMAT", &LOG_CONSOLE_TIME_FORMAT)
+	grest.LoadEnv("LOG_CONSOLE_EXCLUDED_KEYS", &LOG_CONSOLE_EXCLUDED_KEYS)
 	grest.LoadEnv("LOG_FILE_ENABLED", &LOG_FILE_ENABLED)
+	grest.LoadEnv("LOG_FILE_WITH_JSON", &LOG_FILE_WITH_JSON)
 	grest.LoadEnv("LOG_FILE_USE_LOCAL_TIME", &LOG_FILE_USE_LOCAL_TIME)
 	grest.LoadEnv("LOG_FILE_FILENAME", &LOG_FILE_FILENAME)
 	grest.LoadEnv("LOG_FILE_MAX_SIZE", &LOG_FILE_MAX_SIZE)
 	grest.LoadEnv("LOG_FILE_MAX_AGE", &LOG_FILE_MAX_AGE)
 	grest.LoadEnv("LOG_FILE_MAX_BACKUPS", &LOG_FILE_MAX_BACKUPS)
+	grest.LoadEnv("LOG_WITH_DURATION", &LOG_WITH_DURATION)
+	grest.LoadEnv("LOG_WITH_REQUEST_HEADER", &LOG_WITH_REQUEST_HEADER)
+	grest.LoadEnv("LOG_WITH_REQUEST_BODY", &LOG_WITH_REQUEST_BODY)
+	grest.LoadEnv("LOG_WITH_RESPONSE_BODY", &LOG_WITH_RESPONSE_BODY)
 
 	grest.LoadEnv("JWT_KEY", &JWT_KEY)
 	grest.LoadEnv("CRYPTO_KEY", &CRYPTO_KEY)

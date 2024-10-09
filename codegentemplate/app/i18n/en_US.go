@@ -7,6 +7,8 @@ func EnUS() map[string]string {
 		"403_forbidden":                "The user does not have permission to :action.",
 		"404_not_found":                "The resource you have specified cannot be found.",
 		"500_internal_error":           "Failed to connect to the server, please try again later.",
+		"deleted":                      ":entity data with :key = :value has been deleted.",
+		"entity_key_value_not_found":   ":entity data with :key = :value cannot be found.",
 		"invalid_username_or_password": "Invalid username or password",
 	}
 }

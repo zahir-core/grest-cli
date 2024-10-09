@@ -7,6 +7,8 @@ func IdID() map[string]string {
 		"403_forbidden":                "Pengguna tidak memiliki izin untuk :action.",
 		"404_not_found":                "The resource you have specified cannot be found.",
 		"500_internal_error":           "Gagal terhubung ke server, silakan coba lagi nanti.",
+		"deleted":                      "Data :entity dengan :key = :value telah dihapus.",
+		"entity_key_value_not_found":   "Data :entity dengan :key = :value tidak ditemukan.",
 		"invalid_username_or_password": "Username atau kata sandi tidak valid",
 	}
 }

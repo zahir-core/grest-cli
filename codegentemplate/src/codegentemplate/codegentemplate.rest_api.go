@@ -4,23 +4,22 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"grest.dev/grest"
 
 	"grest.dev/cmd/codegentemplate/app"
 )
 
-// REST returns a *RESTAPIHandler.
-func REST() *RESTAPIHandler {
-	return &RESTAPIHandler{}
+// REST returns a *restAPI.
+func REST() *restAPI {
+	return &restAPI{}
 }
 
-// RESTAPIHandler provides a convenient interface for CodeGenTemplate REST API handler.
-type RESTAPIHandler struct {
-	UseCase UseCaseHandler
+// restAPI provides a convenient interface for codegentemplate REST API handler.
+type restAPI struct {
+	UseCase useCase
 }
 
-// injectDeps inject the dependencies of the CodeGenTemplate REST API handler.
-func (r *RESTAPIHandler) injectDeps(c *fiber.Ctx) error {
+// injectDeps inject the dependencies of the codegentemplate REST API handler.
+func (r *restAPI) injectDeps(c *fiber.Ctx) error {
 	ctx, ok := c.Locals(app.CtxKey).(*app.Ctx)
 	if !ok {
 		return app.Error().New(http.StatusInternalServerError, "ctx is not found")
@@ -29,144 +28,114 @@ func (r *RESTAPIHandler) injectDeps(c *fiber.Ctx) error {
 	return nil
 }
 
-// GetByID is the REST API handler for `GET /api/end_point/{id}`.
-func (r *RESTAPIHandler) GetByID(c *fiber.Ctx) error {
-	err := r.injectDeps(c)
-	if err != nil {
-		return app.Error().Handler(c, err)
+// GetByID is the REST API handler for `GET /api/v3/end_point/{id}`.
+func (r *restAPI) GetByID(c *fiber.Ctx) error {
+	if err := r.injectDeps(c); err != nil {
+		return app.Server().Error(c, err)
 	}
 	res, err := r.UseCase.GetByID(c.Params("id"))
 	if err != nil {
-		return app.Error().Handler(c, err)
+		return app.Server().Error(c, err)
 	}
-	if r.UseCase.IsFlat() {
-		return c.JSON(res)
-	}
-	return c.JSON(grest.NewJSON(res).ToStructured().Data)
+	return c.JSON(app.Query().Return(res, res.IsFlat()))
 }
 
-// Get is the REST API handler for `GET /api/end_point`.
-func (r *RESTAPIHandler) Get(c *fiber.Ctx) error {
-	err := r.injectDeps(c)
-	if err != nil {
-		return app.Error().Handler(c, err)
+// Get is the REST API handler for `GET /api/v3/end_point`.
+func (r *restAPI) Get(c *fiber.Ctx) error {
+	if err := r.injectDeps(c); err != nil {
+		return app.Server().Error(c, err)
 	}
 	res, err := r.UseCase.Get()
 	if err != nil {
-		return app.Error().Handler(c, err)
+		return app.Server().Error(c, err)
 	}
 	res.SetLink(c)
-	if r.UseCase.IsFlat() {
-		return c.JSON(res)
-	}
-	return c.JSON(grest.NewJSON(res).ToStructured().Data)
+	model := &CodeGenTemplate{}
+	return c.JSON(app.Query().Return(res, model.IsFlat()))
 }
 
-// Create is the REST API handler for `POST /api/end_point`.
-func (r *RESTAPIHandler) Create(c *fiber.Ctx) error {
-	err := r.injectDeps(c)
-	if err != nil {
-		return app.Error().Handler(c, err)
+// Create is the REST API handler for `POST /api/v3/end_point`.
+func (r *restAPI) Create(c *fiber.Ctx) error {
+	if err := r.injectDeps(c); err != nil {
+		return app.Server().Error(c, err)
 	}
-	p := ParamCreate{}
-	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
-	if err != nil {
-		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
+	param := &CodeGenTemplate{}
+	paramCreate := &ParamCreate{}
+	if err := app.Query().BindJSON(c.Body(), param, paramCreate); err != nil {
+		return app.Server().Error(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
-	err = r.UseCase.Create(&p)
-	if err != nil {
-		return app.Error().Handler(c, err)
+	if err := r.UseCase.Create(param, paramCreate); err != nil {
+		return app.Server().Error(c, err)
 	}
 	if r.UseCase.Query.Get("is_skip_return") == "true" {
 		return c.Status(http.StatusCreated).JSON(map[string]any{"message": "Success"})
 	}
-	res, err := r.UseCase.GetByID(p.ID.String)
+	res, err := r.UseCase.GetByID(param.ID.String)
 	if err != nil {
-		return app.Error().Handler(c, err)
+		return app.Server().Error(c, err)
 	}
-	if r.UseCase.IsFlat() {
-		return c.Status(http.StatusCreated).JSON(res)
-	}
-	return c.Status(http.StatusCreated).JSON(grest.NewJSON(res).ToStructured().Data)
+	return c.Status(http.StatusCreated).JSON(app.Query().Return(res, res.IsFlat()))
 }
 
-// UpdateByID is the REST API handler for `PUT /api/end_point/{id}`.
-func (r *RESTAPIHandler) UpdateByID(c *fiber.Ctx) error {
-	err := r.injectDeps(c)
-	if err != nil {
-		return app.Error().Handler(c, err)
+// UpdateByID is the REST API handler for `PUT /api/v3/end_point/{id}`.
+func (r *restAPI) UpdateByID(c *fiber.Ctx) error {
+	if err := r.injectDeps(c); err != nil {
+		return app.Server().Error(c, err)
 	}
-	p := ParamUpdate{}
-	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
-	if err != nil {
-		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
+	param := &CodeGenTemplate{}
+	paramUpdate := &ParamUpdate{}
+	if err := app.Query().BindJSON(c.Body(), param, paramUpdate); err != nil {
+		return app.Server().Error(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
-	err = r.UseCase.UpdateByID(c.Params("id"), &p)
-	if err != nil {
-		return app.Error().Handler(c, err)
+	if err := r.UseCase.UpdateByID(c.Params("id"), param, paramUpdate); err != nil {
+		return app.Server().Error(c, err)
 	}
 	if r.UseCase.Query.Get("is_skip_return") == "true" {
 		return c.JSON(map[string]any{"message": "Success"})
 	}
 	res, err := r.UseCase.GetByID(c.Params("id"))
 	if err != nil {
-		return app.Error().Handler(c, err)
+		return app.Server().Error(c, err)
 	}
-	if r.UseCase.IsFlat() {
-		return c.JSON(res)
-	}
-	return c.JSON(grest.NewJSON(res).ToStructured().Data)
+	return c.JSON(app.Query().Return(res, res.IsFlat()))
 }
 
-// PartiallyUpdateByID is the REST API handler for `PATCH /api/end_point/{id}`.
-func (r *RESTAPIHandler) PartiallyUpdateByID(c *fiber.Ctx) error {
-	err := r.injectDeps(c)
-	if err != nil {
-		return app.Error().Handler(c, err)
+// PartiallyUpdateByID is the REST API handler for `PATCH /api/v3/end_point/{id}`.
+func (r *restAPI) PartiallyUpdateByID(c *fiber.Ctx) error {
+	if err := r.injectDeps(c); err != nil {
+		return app.Server().Error(c, err)
 	}
-	p := ParamPartiallyUpdate{}
-	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
-	if err != nil {
-		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
+	param := &CodeGenTemplate{}
+	paramUpdate := &ParamPartiallyUpdate{}
+	if err := app.Query().BindJSON(c.Body(), param, paramUpdate); err != nil {
+		return app.Server().Error(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
-	err = r.UseCase.PartiallyUpdateByID(c.Params("id"), &p)
-	if err != nil {
-		return app.Error().Handler(c, err)
+	if err := r.UseCase.PartiallyUpdateByID(c.Params("id"), param, paramUpdate); err != nil {
+		return app.Server().Error(c, err)
 	}
 	if r.UseCase.Query.Get("is_skip_return") == "true" {
 		return c.JSON(map[string]any{"message": "Success"})
 	}
 	res, err := r.UseCase.GetByID(c.Params("id"))
 	if err != nil {
-		return app.Error().Handler(c, err)
+		return app.Server().Error(c, err)
 	}
-	if r.UseCase.IsFlat() {
-		return c.JSON(res)
-	}
-	return c.JSON(grest.NewJSON(res).ToStructured().Data)
+	return c.JSON(app.Query().Return(res, res.IsFlat()))
 }
 
-// DeleteByID is the REST API handler for `DELETE /api/end_point/{id}`.
-func (r *RESTAPIHandler) DeleteByID(c *fiber.Ctx) error {
+// DeleteByID is the REST API handler for `DELETE /api/v3/end_point/{id}`.
+func (r *restAPI) DeleteByID(c *fiber.Ctx) error {
 	err := r.injectDeps(c)
 	if err != nil {
-		return app.Error().Handler(c, err)
+		return app.Server().Error(c, err)
 	}
-	p := ParamDelete{}
-	err = grest.NewJSON(c.Body()).ToFlat().Unmarshal(&p)
-	if err != nil {
-		return app.Error().Handler(c, app.Error().New(http.StatusBadRequest, err.Error()))
+	id := c.Params("id")
+	paramDelete := &ParamDelete{}
+	if err := app.Query().BindJSON(c.Body(), paramDelete); err != nil {
+		return app.Server().Error(c, app.Error().New(http.StatusBadRequest, err.Error()))
 	}
-	err = r.UseCase.DeleteByID(c.Params("id"), &p)
-	if err != nil {
-		return app.Error().Handler(c, err)
+	if err = r.UseCase.DeleteByID(id, paramDelete); err != nil {
+		return app.Server().Error(c, err)
 	}
-	res := map[string]any{
-		"code": http.StatusOK,
-		"message": r.UseCase.Ctx.Trans("deleted", map[string]string{
-			"end_point": p.EndPoint(),
-			"id":        c.Params("id"),
-		}),
-	}
-	return c.JSON(res)
+	return c.JSON(r.UseCase.Ctx.Deleted(CodeGenTemplate{}.EndPoint(), "id", id))
 }

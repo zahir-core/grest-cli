@@ -1,11 +1,15 @@
 package app
 
 import (
-	"errors"
+	"log"
+	"log/slog"
+	"os"
 	"strings"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/plugin/dbresolver"
 	"grest.dev/grest"
 )
@@ -44,23 +48,34 @@ func (d *dbUtil) configure() *dbUtil {
 	c.DbName = DB_DATABASE
 	err := d.Connect("main", c)
 	if err != nil {
-		Logger().Fatal().
-			Err(err).
-			Str("driver", c.Driver).
-			Str("host", c.Host).
-			Int("port", c.Port).
-			Str("user", c.User).
-			Str("password", c.Password).
-			Str("db_name", c.DbName).
-			Msg("Failed to connect to main DB")
+		Logger().Fatal("Failed to connect to main DB",
+			slog.Any("err", err),
+			slog.String("driver", c.Driver),
+			slog.String("host", c.Host),
+			slog.Int("port", c.Port),
+			slog.String("user", c.User),
+			slog.String("password", c.Password),
+			slog.String("db_name", c.DbName),
+		)
 	}
 	return d
 }
 
 // Connect connect to the db and store to config based on connName key.
 func (d *dbUtil) Connect(connName string, c grest.DBConfig) error {
+	dbLogLevel := gormlogger.Error
+	if DB_IS_DEBUG {
+		dbLogLevel = gormlogger.Info
+	}
 	dialector := postgres.Open(c.DSN())
-	gormDB, err := gorm.Open(dialector, &gorm.Config{})
+	gormDB, err := gorm.Open(dialector, &gorm.Config{
+		Logger: gormlogger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), gormlogger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			LogLevel:                  dbLogLevel,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		}),
+	})
 	if err != nil {
 		return err
 	}
@@ -103,9 +118,4 @@ func (d *dbUtil) setupReplicas(db *gorm.DB, c grest.DBConfig) {
 			Policy:   dbresolver.RandomPolicy{},
 		}))
 	}
-}
-
-// IsNotFoundError check if an error is not found error.
-func (*dbUtil) IsNotFoundError(err error) bool {
-	return errors.Is(err, gorm.ErrRecordNotFound)
 }

@@ -21,7 +21,7 @@ type routerUtil struct {
 }
 
 func (r *routerUtil) Configure() {
-	app.Server().AddRoute("/api/version", "GET", app.VersionHandler, nil)
+	app.Server().AddRoute("/api/version", "GET", app.Server().Version, nil)
 
 	// AddRoute : DONT REMOVE THIS COMMENT
 }

@@ -1,6 +1,10 @@
 package src
 
-import "grest.dev/cmd/codegentemplate/app"
+import (
+	"log/slog"
+
+	"grest.dev/cmd/codegentemplate/app"
+)
 
 func Seeder() *seederUtil {
 	if seeder == nil {
@@ -21,9 +25,16 @@ type seederUtil struct {
 }
 
 func (s *seederUtil) Configure() {
-
+	// example
+	// app.DB().RegisterSeeder("main", "2024-10-09_16.30-country-data", country.Seeder().Run)
 }
 
 func (s *seederUtil) Run() {
-
+	tx, err := app.DB().Conn("main")
+	if err != nil {
+		app.Logger().Error("Failed to connect to main db", slog.Any("err", err))
+	}
+	if err = app.DB().RunSeeder(tx, "main", app.Setting{}); err != nil {
+		app.Logger().Error("Failed to connect to run seeder", slog.Any("err", err))
+	}
 }

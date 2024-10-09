@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"io"
+	"log/slog"
 	"os"
 
 	"github.com/jinzhu/copier"
@@ -86,7 +87,7 @@ func (f fsUtil) configure() *fsUtil {
 // It also creates the local directory path if it doesn't exist.
 func (f fsUtil) setLocalFS() *fsUtil {
 	if f.err != nil {
-		Logger().Error().Msg(f.err.Error() + ", local filesystem will be used.")
+		Logger().Error("Failed to configure object storage, local filesystem will be used", slog.Any("err", f.err))
 	}
 	f.Driver = "local"
 	f.LocalDirPath = FS_LOCAL_DIR_PATH
@@ -106,13 +107,12 @@ func (f fsUtil) setLocalFS() *fsUtil {
 func (f fsUtil) createLocalDirPath() {
 	_, err := os.Stat(f.LocalDirPath)
 	if os.IsNotExist(err) {
-		err = os.Mkdir(f.LocalDirPath, 0755)
-		if err != nil {
-			Logger().Error().
-				Err(err).
-				Str("FS_DRIVER", FS_DRIVER).
-				Str("LocalDirPath", f.LocalDirPath).
-				Msg("Failed to create local dir path.")
+		if err = os.Mkdir(f.LocalDirPath, 0755); err != nil {
+			Logger().Error("Failed to create local dir path",
+				slog.Any("err", f.err),
+				slog.String("FS_DRIVER", FS_DRIVER),
+				slog.String("LocalDirPath", f.LocalDirPath),
+			)
 		}
 	}
 }

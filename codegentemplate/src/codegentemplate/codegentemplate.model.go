@@ -9,7 +9,7 @@ type CodeGenTemplate struct {
 	// AddField : DONT REMOVE THIS COMMENT
 	CreatedAt app.NullDateTime `json:"created_at" db:"m.created_at"      gorm:"column:created_at"`
 	UpdatedAt app.NullDateTime `json:"updated_at" db:"m.updated_at"      gorm:"column:updated_at"`
-	DeletedAt app.NullDateTime `json:"deleted_at" db:"m.deleted_at,hide" gorm:"column:deleted_at"`
+	DeletedAt app.NullDateTime `json:"deleted_at" db:"-"                 gorm:"column:deleted_at"`
 }
 
 // EndPoint returns the CodeGenTemplate end point, it used for cache key, etc.
@@ -18,9 +18,9 @@ func (CodeGenTemplate) EndPoint() string {
 }
 
 // TableVersion returns the versions of the CodeGenTemplate table in the database.
-// Change this value with date format YY.MM.DDHHii when any table structure changes.
+// Change this value with date format YYYY-MM-DD_HH.ii when any table structure changes.
 func (CodeGenTemplate) TableVersion() string {
-	return "28.06.291152"
+	return "2024-10-09_16.30"
 }
 
 // TableName returns the name of the CodeGenTemplate table in the database.
@@ -75,6 +75,7 @@ func (m *CodeGenTemplate) GetOpenAPISchema() map[string]any {
 
 type CodeGenTemplateList struct {
 	app.ListModel
+	Data []CodeGenTemplate `json:"results"`
 }
 
 // OpenAPISchemaName returns the name of the CodeGenTemplateList schema in the open api documentation.
@@ -89,23 +90,23 @@ func (p *CodeGenTemplateList) GetOpenAPISchema() map[string]any {
 
 // ParamCreate is the expected parameters for create a new CodeGenTemplate data.
 type ParamCreate struct {
-	UseCaseHandler
+	CodeGenTemplate
 }
 
 // ParamUpdate is the expected parameters for update the CodeGenTemplate data.
 type ParamUpdate struct {
-	UseCaseHandler
+	CodeGenTemplate
 	Reason app.NullString `json:"reason" gorm:"-" validate:"required"`
 }
 
 // ParamPartiallyUpdate is the expected parameters for partially update the CodeGenTemplate data.
 type ParamPartiallyUpdate struct {
-	UseCaseHandler
+	CodeGenTemplate
 	Reason app.NullString `json:"reason" gorm:"-" validate:"required"`
 }
 
 // ParamDelete is the expected parameters for delete the CodeGenTemplate data.
 type ParamDelete struct {
-	UseCaseHandler
+	CodeGenTemplate
 	Reason app.NullString `json:"reason" gorm:"-" validate:"required"`
 }

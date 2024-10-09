@@ -1,6 +1,7 @@
 package codegentemplate
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"time"
@@ -8,9 +9,9 @@ import (
 	"grest.dev/cmd/codegentemplate/app"
 )
 
-// UseCase returns a UseCaseHandler for expected use case functional.
-func UseCase(ctx app.Ctx, query ...url.Values) UseCaseHandler {
-	u := UseCaseHandler{
+// UseCase returns a useCase for expected use case functional.
+func UseCase(ctx app.Ctx, query ...url.Values) useCase {
+	u := useCase{
 		Ctx:   &ctx,
 		Query: url.Values{},
 	}
@@ -20,23 +21,22 @@ func UseCase(ctx app.Ctx, query ...url.Values) UseCaseHandler {
 	return u
 }
 
-// UseCaseHandler provides a convenient interface for CodeGenTemplate use case, use UseCase to access UseCaseHandler.
-type UseCaseHandler struct {
-	CodeGenTemplate
+// useCase provides a convenient interface for codegentemplate use case, use UseCase to access useCase.
+type useCase struct {
 
 	// injectable dependencies
 	Ctx   *app.Ctx   `json:"-" db:"-" gorm:"-"`
 	Query url.Values `json:"-" db:"-" gorm:"-"`
 }
 
-// Async return UseCaseHandler with async process.
-func (u UseCaseHandler) Async(ctx app.Ctx, query ...url.Values) UseCaseHandler {
+// Async return useCase for async process
+func (u useCase) Async(ctx app.Ctx, query ...url.Values) useCase {
 	ctx.IsAsync = true
 	return UseCase(ctx, query...)
 }
 
-// GetByID returns the CodeGenTemplate data for the specified ID.
-func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
+// GetByID returns the codegentemplate data for the specified ID.
+func (u useCase) GetByID(id string) (CodeGenTemplate, error) {
 	res := CodeGenTemplate{}
 
 	// check permission
@@ -45,8 +45,15 @@ func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
 		return res, err
 	}
 
+	// validate if codegentemplate is exists
+	key := "id"
+	if !app.Validator().IsValid(id, "uuid") {
+		key = "code"
+	}
+	realID, err := u.GetIDByKey(key, id)
+
 	// get from cache and return if exists
-	cacheKey := u.EndPoint() + "." + id
+	cacheKey := CodeGenTemplate{}.EndPoint() + "." + id
 	app.Cache().Get(cacheKey, &res)
 	if res.ID.Valid {
 		return res, err
@@ -59,14 +66,10 @@ func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
 	}
 
 	// get from db
-	key := "id"
-	if !app.Validator().IsValid(id, "uuid") {
-		key = "code"
-	}
-	u.Query.Add(key, id)
+	u.Query.Add("id", realID.String)
 	err = app.Query().First(tx, &res, u.Query)
 	if err != nil {
-		return res, u.Ctx.NotFoundError(err, u.EndPoint(), key, id)
+		return res, u.Ctx.NotFoundError(err, CodeGenTemplate{}.EndPoint(), key, id)
 	}
 
 	// save to cache and return if exists
@@ -74,8 +77,8 @@ func (u UseCaseHandler) GetByID(id string) (CodeGenTemplate, error) {
 	return res, err
 }
 
-// Get returns the list of CodeGenTemplate data.
-func (u UseCaseHandler) Get() (app.ListModel, error) {
+// Get returns the list of codegentemplate data.
+func (u useCase) Get() (app.ListModel, error) {
 	res := app.ListModel{}
 
 	// check permission
@@ -84,7 +87,7 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 		return res, err
 	}
 	// get from cache and return if exists
-	cacheKey := u.EndPoint() + "?" + u.Query.Encode()
+	cacheKey := CodeGenTemplate{}.EndPoint() + "?" + u.Query.Encode()
 	err = app.Cache().Get(cacheKey, &res)
 	if err == nil {
 		return res, err
@@ -122,8 +125,8 @@ func (u UseCaseHandler) Get() (app.ListModel, error) {
 	return res, err
 }
 
-// Create creates a new data CodeGenTemplate with specified parameters.
-func (u UseCaseHandler) Create(p *ParamCreate) error {
+// Create creates a new data codegentemplate with specified parameters.
+func (u useCase) Create(param *CodeGenTemplate, paramCreate *ParamCreate) error {
 
 	// check permission
 	err := u.Ctx.ValidatePermission("end_point.create")
@@ -132,13 +135,14 @@ func (u UseCaseHandler) Create(p *ParamCreate) error {
 	}
 
 	// validate param
-	err = u.Ctx.ValidateParam(p)
+	err = u.Ctx.ValidateParam(paramCreate)
 	if err != nil {
 		return err
 	}
 
 	// set default value for undefined field
-	err = p.setDefaultValue(CodeGenTemplate{})
+	old := CodeGenTemplate{}
+	err = u.setDefaultValue(old, param)
 	if err != nil {
 		return err
 	}
@@ -150,21 +154,21 @@ func (u UseCaseHandler) Create(p *ParamCreate) error {
 	}
 
 	// save data to db
-	err = tx.Model(&p).Create(&p).Error
+	err = tx.Model(param).Create(&param).Error
 	if err != nil {
 		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
-	app.Cache().Invalidate(u.EndPoint())
+	app.Cache().Invalidate(CodeGenTemplate{}.EndPoint())
 
 	// save history (user activity), send webhook, etc
-	go u.Ctx.Hook("POST", "create", p.ID.String, p)
+	go u.Ctx.Hook("POST", "create", param.ID.String, param)
 	return nil
 }
 
-// UpdateByID updates the CodeGenTemplate data for the specified ID with specified parameters.
-func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
+// UpdateByID updates the codegentemplate data for the specified ID with specified parameters.
+func (u useCase) UpdateByID(id string, param *CodeGenTemplate, paramUpdate *ParamUpdate) error {
 
 	// check permission
 	err := u.Ctx.ValidatePermission("end_point.edit")
@@ -173,7 +177,7 @@ func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
 	}
 
 	// validate param
-	err = u.Ctx.ValidateParam(p)
+	err = u.Ctx.ValidateParam(paramUpdate)
 	if err != nil {
 		return err
 	}
@@ -185,8 +189,7 @@ func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
 	}
 
 	// set default value for undefined field
-	err = p.setDefaultValue(old)
-	if err != nil {
+	if err := u.setDefaultValue(old, param); err != nil {
 		return err
 	}
 
@@ -197,21 +200,21 @@ func (u UseCaseHandler) UpdateByID(id string, p *ParamUpdate) error {
 	}
 
 	// update data on the db
-	err = tx.Model(&p).Where("id = ?", old.ID).Updates(p).Error
+	err = tx.Model(param).Where("id = ?", old.ID).Updates(param).Error
 	if err != nil {
 		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
-	app.Cache().Invalidate(u.EndPoint(), old.ID.String)
+	app.Cache().Invalidate(CodeGenTemplate{}.EndPoint(), old.ID.String)
 
 	// save history (user activity), send webhook, etc
-	go u.Ctx.Hook("PUT", p.Reason.String, old.ID.String, old)
+	go u.Ctx.Hook("PUT", paramUpdate.Reason.String, old.ID.String, old)
 	return nil
 }
 
-// PartiallyUpdateByID updates the CodeGenTemplate data for the specified ID with specified parameters.
-func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) error {
+// PartiallyUpdateByID updates the codegentemplate data for the specified ID with specified parameters.
+func (u useCase) PartiallyUpdateByID(id string, param *CodeGenTemplate, paramUpdate *ParamPartiallyUpdate) error {
 
 	// check permission
 	err := u.Ctx.ValidatePermission("end_point.edit")
@@ -220,7 +223,7 @@ func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) 
 	}
 
 	// validate param
-	err = u.Ctx.ValidateParam(p)
+	err = u.Ctx.ValidateParam(paramUpdate)
 	if err != nil {
 		return err
 	}
@@ -232,8 +235,7 @@ func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) 
 	}
 
 	// set default value for undefined field
-	err = p.setDefaultValue(old)
-	if err != nil {
+	if err := u.setDefaultValue(old, param); err != nil {
 		return err
 	}
 
@@ -244,21 +246,21 @@ func (u UseCaseHandler) PartiallyUpdateByID(id string, p *ParamPartiallyUpdate) 
 	}
 
 	// update data on the db
-	err = tx.Model(&p).Where("id = ?", old.ID).Updates(p).Error
+	err = tx.Model(param).Where("id = ?", old.ID).Updates(param).Error
 	if err != nil {
 		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
-	app.Cache().Invalidate(u.EndPoint(), old.ID.String)
+	app.Cache().Invalidate(CodeGenTemplate{}.EndPoint(), old.ID.String)
 
 	// save history (user activity), send webhook, etc
-	go u.Ctx.Hook("PATCH", p.Reason.String, old.ID.String, old)
+	go u.Ctx.Hook("PATCH", paramUpdate.Reason.String, old.ID.String, old)
 	return nil
 }
 
-// DeleteByID deletes the CodeGenTemplate data for the specified ID.
-func (u UseCaseHandler) DeleteByID(id string, p *ParamDelete) error {
+// DeleteByID deletes the codegentemplate data for the specified ID.
+func (u useCase) DeleteByID(id string, paramDelete *ParamDelete) error {
 
 	// check permission
 	err := u.Ctx.ValidatePermission("end_point.delete")
@@ -267,7 +269,7 @@ func (u UseCaseHandler) DeleteByID(id string, p *ParamDelete) error {
 	}
 
 	// validate param
-	err = u.Ctx.ValidateParam(p)
+	err = u.Ctx.ValidateParam(paramDelete)
 	if err != nil {
 		return err
 	}
@@ -285,26 +287,54 @@ func (u UseCaseHandler) DeleteByID(id string, p *ParamDelete) error {
 	}
 
 	// update data on the db
-	err = tx.Model(&p).Where("id = ?", old.ID).Update("deleted_at", time.Now().UTC()).Error
-	if err != nil {
+	if err = tx.Model(paramDelete).Where("id = ?", old.ID).Update("deleted_at", time.Now().UTC()).Error; err != nil {
 		return app.Error().New(http.StatusInternalServerError, err.Error())
 	}
 
 	// invalidate cache
-	app.Cache().Invalidate(u.EndPoint(), old.ID.String)
+	app.Cache().Invalidate(CodeGenTemplate{}.EndPoint(), old.ID.String)
 
 	// save history (user activity), send webhook, etc
-	go u.Ctx.Hook("DELETE", p.Reason.String, old.ID.String, old)
+	go u.Ctx.Hook("DELETE", paramDelete.Reason.String, old.ID.String, old)
 	return nil
 }
 
-// setDefaultValue set default value of undefined field when create or update CodeGenTemplate data.
-func (u *UseCaseHandler) setDefaultValue(old CodeGenTemplate) error {
-	if !old.ID.Valid {
-		u.ID = app.NewNullUUID()
-	} else {
-		u.ID = old.ID
+// GetIDByKey get codegentemplate id by unique key.
+func (u useCase) GetIDByKey(key, val string) (app.NullUUID, error) {
+	d := &CodeGenTemplate{}
+	app.Cache().Get(CodeGenTemplate{}.EndPoint()+"."+val, d)
+	if d.ID.String != "" {
+		return d.ID, nil
 	}
+	tx, err := u.Ctx.DB()
+	if err != nil {
+		return d.ID, app.Error().New(http.StatusInternalServerError, err.Error())
+	}
+	fKey := "id"
+	if key != "id" {
+		fKey = "code"
+	}
+	tx.Model(d).Where(fKey+" = ?", val).Where("deleted_at is null").Take(d)
+	if d.ID.String != "" {
+		return d.ID, nil
+	}
+	return d.ID, u.Ctx.NotFoundError(nil, CodeGenTemplate{}.EndPoint(), key, val)
+}
 
+// ParseParamCreate return *ParamCreate from CodeGenTemplate
+func (u useCase) ParseParamCreate(data CodeGenTemplate) *ParamCreate {
+	param := &ParamCreate{}
+	b, _ := json.Marshal(data)
+	json.Unmarshal(b, param)
+	return param
+}
+
+// setDefaultValue set default value of undefined field when create or update codegentemplate data.
+func (u useCase) setDefaultValue(old CodeGenTemplate, new *CodeGenTemplate) error {
+	if !old.ID.Valid {
+		new.ID = app.NewNullUUID()
+	} else {
+		new.ID = old.ID
+	}
 	return nil
 }

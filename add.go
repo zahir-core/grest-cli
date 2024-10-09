@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
@@ -188,7 +189,8 @@ func addEndPoint(isUpdateOpenAPI bool) error {
 			newContent := strings.ReplaceAll(string(content), "codegentemplate", packagePath)
 			newContent = strings.ReplaceAll(newContent, "CodeGenTemplate", modelStructName)
 			newContent = strings.ReplaceAll(newContent, "end_point", endPoint)
-			newContent = strings.ReplaceAll(newContent, "// AddField : DONT REMOVE THIS COMMENT\n", newFieldStr)
+			newContent = strings.ReplaceAll(newContent, "2024-10-09_16.30", time.Now().Format("2006-01-02_15.04"))
+			newContent = strings.ReplaceAll(newContent, "// AddField : DONT REMOVE THIS COMMENT", newFieldStr)
 			return os.WriteFile(newFileName, []byte(newContent), 0755)
 		})
 	grest.FormatFile(packagePathWithPrefix)

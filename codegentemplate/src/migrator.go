@@ -1,6 +1,8 @@
 package src
 
 import (
+	"log/slog"
+
 	"grest.dev/cmd/codegentemplate/app"
 	// import : DONT REMOVE THIS COMMENT
 )
@@ -30,11 +32,9 @@ func (*migratorUtil) Configure() {
 func (*migratorUtil) Run() {
 	tx, err := app.DB().Conn("main")
 	if err != nil {
-		app.Logger().Fatal().Err(err).Send()
-	} else {
-		err = app.DB().MigrateTable(tx, "main", app.Setting{})
+		app.Logger().Error("Failed to connect to main db", slog.Any("err", err))
 	}
-	if err != nil {
-		app.Logger().Fatal().Err(err).Send()
+	if err = app.DB().MigrateTable(tx, "main", app.Setting{}); err != nil {
+		app.Logger().Error("Failed to connect to migrate db table", slog.Any("err", err))
 	}
 }

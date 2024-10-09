@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -46,16 +47,16 @@ func (c *cacheUtil) configure() {
 	c.Ctx = context.Background()
 	err := c.RedisClient.Ping(c.Ctx).Err()
 	if err != nil {
-		Logger().Error().
-			Err(err).
-			Str("REDIS_HOST", REDIS_HOST).
-			Str("REDIS_PORT", REDIS_PORT).
-			Str("REDIS_USERNAME", REDIS_USERNAME).
-			Str("REDIS_PASSWORD", REDIS_PASSWORD).
-			Int("REDIS_CACHE_DB", REDIS_CACHE_DB).
-			Msg("Failed to connect to redis. The cache will be use in-memory local storage.")
+		Logger().Error("Failed to connect to redis. The cache will be use in-memory local storage",
+			slog.Any("err", err),
+			slog.String("REDIS_HOST", REDIS_HOST),
+			slog.String("REDIS_PORT", REDIS_PORT),
+			slog.String("REDIS_USERNAME", REDIS_USERNAME),
+			slog.String("REDIS_PASSWORD", REDIS_PASSWORD),
+			slog.Int("REDIS_CACHE_DB", REDIS_CACHE_DB),
+		)
 	} else {
 		c.IsUseRedis = true
-		Logger().Info().Msg("Cache configured with redis.")
+		Logger().Info("Cache configured with redis")
 	}
 }

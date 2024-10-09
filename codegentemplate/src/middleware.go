@@ -23,4 +23,5 @@ type middlewareUtil struct {
 func (*middlewareUtil) Configure() {
 	app.Server().AddMiddleware(middleware.Ctx().New)
 	app.Server().AddMiddleware(middleware.DB().New)
+	app.Server().AddMiddleware(middleware.Log().New)
 }

@@ -15,15 +15,16 @@ const CtxKey = "ctx"
 type Ctx struct {
 	Lang   string // language code
 	Action Action // general request info
+	Err    error
 
 	IsAsync bool     // for async use, autocommit
 	mainTx  *gorm.DB // for normal use, commit & rollback from middleware
 }
 
 type Action struct {
-	Method   string
-	EndPoint string
-	DataID   string
+	Method string
+	Path   string
+	DataID string
 }
 
 // TxBegin begins a new transaction using the main database connection.
@@ -95,21 +96,35 @@ func (c Ctx) DB(connName ...string) (*gorm.DB, error) {
 	return DB().Conn("main")
 }
 
-// This method checks if the given error is a "record not found" error from GORM.
-// If it is, it creates a new HTTP error with a "not found" status and a translated error message.
+// Deleted return translated message for deleted data.
+func (c Ctx) Deleted(entity, key, value string) map[string]any {
+	return map[string]any{
+		"code": http.StatusOK,
+		"message": c.Trans("deleted", map[string]string{
+			"entity": c.Trans(entity),
+			"key":    c.Trans(key),
+			"value":  value,
+		}),
+	}
+}
+
+// NotFoundError creates a new HTTP error with a "not found" status and a translated error message.
 // The translated message includes the entity, key, and value involved in the error.
 // It returns the created error or nil if the given error is not a "not found" error.
 func (c Ctx) NotFoundError(err error, entity, key, value string) error {
-	if err != nil && err == gorm.ErrRecordNotFound {
-		return Error().New(http.StatusNotFound, c.Trans("not_found",
-			map[string]string{
-				"entity": c.Trans(entity),
-				"key":    c.Trans(key),
-				"value":  value,
-			},
-		))
+	errMsg := ""
+	if err != nil {
+		errMsg = err.Error()
 	}
-	return nil
+	return Error().New(http.StatusNotFound, c.Trans("entity_key_value_not_found",
+		map[string]string{
+			"entity": c.Trans(entity),
+			"key":    c.Trans(key),
+			"value":  value,
+		},
+	), map[string]any{
+		"err": errMsg,
+	})
 }
 
 // This method performs a hook operation, which involves sleeping for 2 seconds and performing some data manipulation based on the provided parameters.

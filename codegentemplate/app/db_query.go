@@ -28,6 +28,22 @@ var qu *queryUtil
 // queryUtil represents a query utility.
 type queryUtil struct{}
 
+// Bind binds []byte of json request body to a struct.
+func (queryUtil) BindJSON(body []byte, param ...any) error {
+	for _, p := range param {
+		if flat, ok := p.(interface{ IsFlat() bool }); ok && flat.IsFlat() {
+			if err := json.Unmarshal(body, p); err != nil {
+				return err
+			}
+		} else {
+			if err := grest.NewJSON(body, true).ToFlat().Unmarshal(p); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // Parse parse url to url.Values.
 func (queryUtil) Parse(originalURL string) url.Values {
 	query := url.Values{}
@@ -104,4 +120,12 @@ func (queryUtil) PaginationInfo(db *gorm.DB, model ModelInterface, query url.Val
 	page, perPage = q.GetPageLimit()
 	pageCount = int(math.Ceil(float64(count) / float64(perPage)))
 	return count, page, perPage, pageCount, err
+}
+
+// Return return any to structured data if not flat
+func (queryUtil) Return(res any, isFlat bool) any {
+	if isFlat {
+		return res
+	}
+	return grest.NewJSON(res).ToStructured().Data
 }

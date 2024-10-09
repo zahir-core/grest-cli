@@ -70,8 +70,8 @@ func (t *testUtil) NewCtx(aclKeys []string) fiber.Handler {
 			mainTx: t.Tx,
 			Lang:   "en",
 			Action: Action{
-				Method:   c.Method(),
-				EndPoint: c.Path(),
+				Method: c.Method(),
+				Path:   c.Path(),
 			},
 		}
 
