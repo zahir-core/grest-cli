@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -23,6 +24,9 @@ func (*dbHandler) New(c *fiber.Ctx) error {
 	ctx, ok := c.Locals(app.CtxKey).(*app.Ctx)
 	if !ok {
 		return app.Error().New(http.StatusInternalServerError, "ctx is not found")
+	}
+	if !slices.Contains([]string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete}, c.Method()) {
+		return c.Next()
 	}
 	ctx.TxBegin()
 	err := c.Next()
